@@ -1,1 +1,0 @@
-pytom -m calibration.main

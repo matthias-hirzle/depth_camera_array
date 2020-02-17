@@ -2,7 +2,7 @@ import argparse
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser('Measures the scene')
     parser.add_argument('--camera_setup', type=str, help='Path to the file, created by calibration module')
     parser.add_argument('--bottom', type=int, help='Bottom of the measurement sphere in mm')
     parser.add_argument('--height', type=int, help='Height of the measurement sphere in mm')
