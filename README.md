@@ -18,8 +18,8 @@ source venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
+
 ### Install via pip
-:
 ```bash
 pip install git+https://github.com/matthias-hirzle/depth_camera_array.git@master#egg=depth_camera_array
 ```
