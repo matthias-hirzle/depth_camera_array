@@ -4,6 +4,7 @@
 ```git clone https://github.com/matthias-hirzle/DepthCamera-Extrinsics-Calibration.git```
 1. Create a virtual environment
 ```python3 -m venv venv```
+> Maybe you need to 
 1. Activate the virtual environment
 ```source venv/bin/activate```
 1. Install requirements
