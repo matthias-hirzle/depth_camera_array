@@ -16,11 +16,15 @@ def parse_args() -> argparse.Namespace:
 
 
 def dump_scene():
+    base_path = '/home/matze/projects/depth_camera_array/data'
     try:
         cameras = initialize_connected_cameras()
         for camera in cameras:
             for k, v in camera.poll_frames().items():
-                v.dump(f'/home/matze/projects/depth_camera_array/data/{camera._device_id}_{k}')
+                v.dump(f'{base_path}/{camera._device_id}_{k}')
+                if k == 'color':
+                    cv2.imwrite(f'{base_path}/{camera._device_id}_color.png', v)
+
     except RuntimeError as error:
         print(error)
     finally:
@@ -28,7 +32,6 @@ def dump_scene():
 
 
 
-#cv2.imwrite(f'/home/matze/projects/depth_camera_array/data/array_{camera._device_id}.png', frames['color'])
 
 
 def check_single_rgb():
