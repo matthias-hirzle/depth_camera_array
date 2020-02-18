@@ -1,18 +1,19 @@
 from typing import List
 
+import numpy as np
 from pyrealsense2 import pyrealsense2 as rs
 
 
 class DepthCamera:
     def __init__(self, device_id: str, context: rs.context):
-        resolution_width = 1280
-        resolution_height = 720
-        frame_rate = 15
+        resolution_width = 640
+        resolution_height = 480
+        frame_rate = 30
         print(device_id)
         self._device_id = device_id
         self._context = context
 
-        self._pipeline = rs.pipeline(context)
+        self._pipeline = rs.pipeline()
         self._config = rs.config()
         self._config.enable_device(self._device_id)
         self._config.enable_stream(rs.stream.depth, resolution_width, resolution_height, rs.format.z16, frame_rate)
@@ -26,14 +27,14 @@ class DepthCamera:
     def poll_frames(self):
         # streams = self._profile.get_streams()
         # color = rs.pipeline_profile.get_stream(self._profile, rs.stream.color)
-        # stream_set = self._pipeline.poll_for_frames()
-        # print(len(stream_set))
         frames = self._pipeline.wait_for_frames()
-        pass
+        return {
+            'color': np.asanyarray(frames.get_color_frame().get_data()),
+            'depth': np.asanyarray(frames.get_depth_frame().get_data())
+        }
 
-    def find_qr(self) -> list:
-        """finds QR code positions"""
-        pass
+    def close(self):
+        self._pipeline.stop()
 
 
 def _find_connected_devices(context):
