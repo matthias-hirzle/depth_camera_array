@@ -4,3 +4,7 @@ def calibrate_relative():
 
 def calibrate_absolute():
     pass
+
+
+def find_qr():
+    pass
