@@ -1,0 +1,3 @@
+pyrealsense2
+opencv-python
+numpy

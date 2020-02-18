@@ -10,9 +10,6 @@ def parse_args() -> argparse.Namespace:
 def main():
     """Creates a camera setup file containing camera ids and extrinsic information"""
     args = parse_args()
-    with open(args.output, 'w') as f:
-        f.write('hello world')
-    print(args.output)
 
 
 if __name__ == '__main__':
