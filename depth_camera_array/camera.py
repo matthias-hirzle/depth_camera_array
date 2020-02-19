@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import List, Tuple
 
 import numpy as np
 from pyrealsense2 import pyrealsense2 as rs
@@ -17,22 +17,14 @@ class Camera:
         self._config = rs.config()
         self._config.enable_device(self._device_id)
         self._config.enable_stream(rs.stream.depth, resolution_width, resolution_height, rs.format.z16, frame_rate)
-        # self._config.enable_stream(rs.stream.infrared, 1, resolution_width, resolution_height, rs.format.y8, frame_rate)
         self._config.enable_stream(rs.stream.color, resolution_width, resolution_height, rs.format.bgr8, frame_rate)
 
         self._pipeline_profile: rs.pipeline_profile = self._pipeline.start(self._config)
         self._depth_scale = self._pipeline_profile.get_device().first_depth_sensor().get_depth_scale()
-        # self._profile = self._pipeline.start(self._config)
 
     def poll_frames(self) -> rs.composite_frame:
         """Returns a frames object with each available frame type"""
-        # streams = self._profile.get_streams()
-        # color = rs.pipeline_profile.get_stream(self._profile, rs.stream.color)
         frames = self._pipeline.wait_for_frames()
-        # return {
-        #     'color': np.asanyarray(frames.get_color_frame().get_data()),
-        #     'depth': np.asanyarray(frames.get_depth_frame().get_data())
-        # }
         return frames
 
     def close(self):
@@ -74,10 +66,6 @@ class Camera:
 
 def extract_color_image(frames: rs.composite_frame) -> np.ndarray:
     return np.asanyarray(frames.get_color_frame().get_data())
-
-
-def extract_depth_data(frames: rs.composite_frame) -> np.ndarray:
-    return np.asanyarray(frames.get_depth_frame().get_data())
 
 
 def _find_connected_devices(context):
