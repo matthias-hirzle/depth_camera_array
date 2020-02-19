@@ -8,14 +8,12 @@ import pyrealsense2 as rs
 from cv2 import cv2
 
 from depth_camera_array.camera import initialize_connected_cameras
-from depth_camera_array.utilities import get_or_create_data_path
+from depth_camera_array.utilities import get_or_create_data_dir
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser('Performes an extrinsic calibration for all available cameras')
-    parser.add_argument('--data_dir', type=str, required=False, help='Path to data dir',
-
-                        default=get_or_create_data_path())
+    parser.add_argument('--data_dir', type=str, required=False, help='Data location to load and dump config files', default=get_or_create_data_dir())
     return parser.parse_args()
 
 

@@ -7,7 +7,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--bottom', type=int, help='Bottom of the measurement sphere in mm')
     parser.add_argument('--height', type=int, help='Height of the measurement sphere in mm')
     parser.add_argument('--radius', type=int, help='Radius of the measurement sphere in mm')
-    parser.add_argument('--output', type=str, help='Path to output file')
+    parser.add_argument('--data_dir', type=str, help='Data location to load and dump config files')
     return parser.parse_args()
 
 

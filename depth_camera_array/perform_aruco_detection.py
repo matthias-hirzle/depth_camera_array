@@ -6,12 +6,12 @@ from typing import List, Tuple
 from cv2 import aruco
 
 from depth_camera_array.camera import initialize_connected_cameras, extract_color_image, close_connected_cameras
-from depth_camera_array.utilities import get_or_create_data_path
+from depth_camera_array.utilities import get_or_create_data_dir
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser('Detects all available acuro markers')
-    parser.add_argument('--base_path', type=str, required=False, help='Path to output file', default=get_or_create_data_path())
+    parser.add_argument('--data_dir', type=str, required=False, help='Data location to load and dump config files', default=get_or_create_data_dir())
     return parser.parse_args()
 
 
@@ -23,7 +23,7 @@ def main():
         all_2d_centers_of_arucos, all_detected_aruco_ids = read_aruco_codes_from_frame(frames)
         tree_dimensional_points = cam.image_points_to_object_points(all_2d_centers_of_arucos, frames)
         assert len(tree_dimensional_points) == len(all_detected_aruco_ids)
-        dump_arcuro_data(cam._device_id, all_detected_aruco_ids, tree_dimensional_points, args.base_path)
+        dump_arcuro_data(cam._device_id, all_detected_aruco_ids, tree_dimensional_points, args.data_dir)
     close_connected_cameras(cameras)
 
 
@@ -50,7 +50,7 @@ def calc_center_coordinates(corners) -> List[float]:
     return [x_sum / 4, y_sum / 4]
 
 
-def dump_arcuro_data(camera_id: str, code_id_array: List[str], coordinate_array: List[Tuple[float, float, float]], base_path: str):
+def dump_arcuro_data(camera_id: str, code_id_array: List[str], coordinate_array: List[Tuple[float, float, float]], data_dir: str):
 
     new_dict = {}
     new_dict.update(camera_id=camera_id)
@@ -58,7 +58,7 @@ def dump_arcuro_data(camera_id: str, code_id_array: List[str], coordinate_array:
     new_dict.update(centers=coordinate_array)
 
     # write to a file
-    with open(os.path.join(base_path, f'{camera_id}_reference_points.json'), 'w')as json_file:
+    with open(os.path.join(data_dir, f'{camera_id}_reference_points.json'), 'w')as json_file:
         json.dump(new_dict, json_file)
 
 
