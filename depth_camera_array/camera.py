@@ -50,22 +50,20 @@ def image_points_to_object_points(color_pixels: np.array, frames: rs.composite_f
     color_intrinsics: rs.intrinsics = color_profile.as_video_stream_profile().get_intrinsics()
     depth_intrinsics: rs.intrinsics = depth_profile.as_video_stream_profile().get_intrinsics()
 
-    color_to_depth_extrinsics: rs.extrinsics = color_profile.get_extrinsics_to(depth_profile)
-    depth_to_color_extrinsics: rs.extrinsics = depth_profile.get_extrinsics_to(color_profile)
+    color_to_depth_extrinsics: rs.extrinsics = color_profile.as_video_stream_profile().get_extrinsics_to(depth_profile)
+    depth_to_color_extrinsics: rs.extrinsics = depth_profile.as_video_stream_profile().get_extrinsics_to(color_profile)
 
-    depth_pixels = [
-        rs.rs2_project_color_pixel_to_depth_pixel(
-            data=depth.get_data(),
-            depth_scale=1,
-            depth_min=0.1,
-            depth_max=10,
-            depth_intrin=depth_intrinsics,
-            color_intrin=color_intrinsics,
-            depth_to_color=depth_to_color_extrinsics,
-            color_to_depth=color_to_depth_extrinsics,
-            from_pixel=color_pixel
-        ) for color_pixel in color_pixels
-    ]
+    depth_pixels = [rs.rs2_project_color_pixel_to_depth_pixel(
+        depth.get_data(),
+        1.0,
+        0.1,
+        10.0,
+        depth_intrinsics,
+        color_intrinsics,
+        depth_to_color_extrinsics,
+        color_to_depth_extrinsics,
+        color_pixel
+    ) for color_pixel in color_pixels]
     return [rs.rs2_deproject_pixel_to_point(depth_intrinsics, pixel) for pixel in depth_pixels]
 
 
