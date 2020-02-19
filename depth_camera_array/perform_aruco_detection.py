@@ -18,22 +18,24 @@ def parse_args() -> argparse.Namespace:
 def main():
     # args = parse_args()
     cameras = initialize_connected_cameras()
-    # rgb_image = cv2.imread("817612070307_color.png") #for testing reasons without having a cam connected
     for cam in cameras:
         frames = cam.poll_frames()
-        rgb_image = extract_color_image(frames)
-        aruco_dict = aruco.Dictionary_get(aruco.DICT_5X5_250)
-        detected_coords, ids, _ = aruco.detectMarkers(rgb_image, aruco_dict)
-        all_2d_centers = []
-        for index, cam_id in enumerate(ids):  # for each found aruco-code
-            act_coord = detected_coords[index]
-            center_of_actual_code = calc_center_coordinates(act_coord)
-            all_2d_centers.append(center_of_actual_code)
-            print(center_of_actual_code)
+        all_2d_centers_of_arucos, all_detected_aruco_ids = read_aruco_codes_from_frame(frames)
+        tree_dimensional_points = cam.image_points_to_object_points(all_2d_centers_of_arucos, frames)
+        assert len(tree_dimensional_points) == len(all_detected_aruco_ids)
+        dump_arcuro_data(cam._device_id, all_detected_aruco_ids, tree_dimensional_points)
 
-        tree_dimensional_points = cam.image_points_to_object_points(all_2d_centers, frames)
-        assert len(tree_dimensional_points) == len(ids)
-        dump_arcuro_data(cam._device_id, ids, tree_dimensional_points)
+
+def read_aruco_codes_from_frame(frames):
+    rgb_image = extract_color_image(frames)
+    aruco_dict = aruco.Dictionary_get(aruco.DICT_5X5_250)
+    detected_coords, ids, _ = aruco.detectMarkers(rgb_image, aruco_dict)
+    all_2d_centers = []
+    for index, cam_id in enumerate(ids):  # for each found aruco-code
+        act_coord = detected_coords[index]
+        center_of_actual_code = calc_center_coordinates(act_coord)
+        all_2d_centers.append(center_of_actual_code)
+    return all_2d_centers, ids
 
 
 def calc_center_coordinates(corners) -> np.array(float):
