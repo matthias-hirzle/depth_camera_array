@@ -48,7 +48,7 @@ class Camera:
         color_profile: rs.stream_profile = color.get_profile()
         depth_profile = depth.get_profile()
 
-        depth_intrinsics: rs.intrinsics =
+        # depth_intrinsics: rs.intrinsics =
 
 
         color_to_depth_extrinsics: rs.extrinsics = color_profile.get_extrinsics_to(depth_profile)
