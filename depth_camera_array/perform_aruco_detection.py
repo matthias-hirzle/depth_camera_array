@@ -1,19 +1,17 @@
 import argparse
-import os
-
-from cv2 import aruco
 import json
-
-from depth_camera_array.camera import initialize_connected_cameras, extract_color_image
+import os
 from typing import List, Tuple
 
+from cv2 import aruco
+
+from depth_camera_array.camera import initialize_connected_cameras, extract_color_image, close_connected_cameras
 from depth_camera_array.utilities import get_or_create_data_path
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser('Detects all available acuro markers')
-    parser.add_argument('--base_path', type=str, required=False, help='Path to output file',
-                        default=get_or_create_data_path())
+    parser.add_argument('--base_path', type=str, required=False, help='Path to output file', default=get_or_create_data_path())
     return parser.parse_args()
 
 
@@ -26,6 +24,7 @@ def main():
         tree_dimensional_points = cam.image_points_to_object_points(all_2d_centers_of_arucos, frames)
         assert len(tree_dimensional_points) == len(all_detected_aruco_ids)
         dump_arcuro_data(cam._device_id, all_detected_aruco_ids, tree_dimensional_points, args.base_path)
+    close_connected_cameras(cameras)
 
 
 def read_aruco_codes_from_frame(frames):
@@ -50,7 +49,7 @@ def calc_center_coordinates(corners) -> List[float]:
         y_sum += coord[1]
     return [x_sum / 4, y_sum / 4]
 
-# write data to json file
+
 def dump_arcuro_data(camera_id: str, code_id_array: List[str], coordinate_array: List[Tuple[float, float, float]], base_path: str):
 
     new_dict = {}
