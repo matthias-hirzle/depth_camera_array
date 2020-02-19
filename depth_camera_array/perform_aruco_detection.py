@@ -1,6 +1,7 @@
 import argparse
 from cv2 import aruco
 import numpy as np
+import json
 
 from depth_camera_array.camera import initialize_connected_cameras, extract_color_image
 from typing import List, Tuple
@@ -48,8 +49,17 @@ def calc_center_coordinates(corners) -> np.array(float):
         y_sum += coord[1]
     return np.array([x_sum / 4, y_sum / 4])
 
+# write data to json file
 def dump_arcuro_data(camera_id: str, code_id_array: List[str], coordinate_array: List[Tuple[int, int, int]]):
-    pass
+
+    new_dict = {}
+    new_dict.update(camera_id=camera_id)
+    new_dict.update(aruco=code_id_array)
+    new_dict.update(centers=coordinate_array)
+
+    # write to a file
+    with open('{}_reference_points.json'.format(camera_id), 'w') as json_file:
+        json.dump(new_dict, json_file)
 
 
 if __name__ == '__main__':
