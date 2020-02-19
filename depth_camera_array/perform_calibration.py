@@ -18,8 +18,6 @@ def parse_args() -> argparse.Namespace:
 
 
 def dump_scene(base_path: str):
-    current_directory = os.getcwd()
-    independent_path = os.path.join(current_directory, '..', 'data', 'output.png')
     try:
         cameras = initialize_connected_cameras()
         for camera in cameras:
