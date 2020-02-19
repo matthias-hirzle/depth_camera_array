@@ -2,7 +2,6 @@ import argparse
 import os
 
 from cv2 import aruco
-import numpy as np
 import json
 
 from depth_camera_array.camera import initialize_connected_cameras, extract_color_image, image_points_to_object_points
