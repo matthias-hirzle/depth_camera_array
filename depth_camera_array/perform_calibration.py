@@ -5,8 +5,6 @@ import numpy as np
 import pyrealsense2 as rs
 from cv2 import cv2
 
-
-# from depth_camera_array.camera import initialize_connected_cameras
 from depth_camera_array.camera import initialize_connected_cameras
 from depth_camera_array.utilities import get_or_create_data_path
 
