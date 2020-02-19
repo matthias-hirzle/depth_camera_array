@@ -99,3 +99,8 @@ def initialize_connected_cameras() -> List[Camera]:
 
     devices = [Camera(device_id, context) for device_id in device_ids]
     return devices
+
+
+def close_connected_cameras(cameras: List[Camera]):
+    for camera in cameras:
+        camera.close()
