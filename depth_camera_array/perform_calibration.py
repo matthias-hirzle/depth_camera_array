@@ -13,20 +13,20 @@ from depth_camera_array.utilities import get_or_create_data_path
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser('Performes an extrinsic calibration for all available cameras')
-    parser.add_argument('--base_path', type=str, required=False, help='Path to output file',
+    parser.add_argument('--data_dir', type=str, required=False, help='Path to data dir',
 
                         default=get_or_create_data_path())
     return parser.parse_args()
 
 
-def dump_scene(base_path: str):
+def dump_scene(data_dir: str):
     try:
         cameras = initialize_connected_cameras()
         for camera in cameras:
             for k, v in camera.poll_frames().items():
-                v.dump(os.path.join(base_path, f'{camera._device_id}_{k}'))
+                v.dump(os.path.join(data_dir, f'{camera._device_id}_{k}'))
                 if k == 'color':
-                    cv2.imwrite(os.path.join(base_path, f'{camera._device_id}_color.png'), v)
+                    cv2.imwrite(os.path.join(data_dir, f'{camera._device_id}_color.png'), v)
 
     except RuntimeError as error:
         print(error)
@@ -65,13 +65,13 @@ def main():
     # print(len(cameras))
     # cameras[0].poll_frames()
     # check_single_rgb()
+    print(args.data_dir)
+    # dump_scene(args.data_dir)
 
-    dump_scene(args.base_path)
-
-    # print(args.base_path)
-    # with open(os.path.join(args.base_path, 'test.txt'), 'w') as f:
+    # print(args.data_dir)
+    # with open(os.path.join(args.data_dir, 'test.txt'), 'w') as f:
     #     f.write('hello world')
-    # dump_scene(args.base_path)
+    # dump_scene(args.data_dir)
     # find_qr('/home/matze/projects/depth_camera_array/data/single.png')
 
     # 1. Identify cameras

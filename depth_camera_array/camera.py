@@ -9,7 +9,7 @@ class Camera:
         resolution_width = 1280
         resolution_height = 720
         frame_rate = 30
-        print(device_id)
+
         self._device_id = device_id
         self._context = context
 
@@ -30,8 +30,8 @@ class Camera:
     def close(self):
         self._pipeline.stop()
 
-    def image_points_to_object_points(self, color_pixels: np.array, frames: rs.composite_frame) -> Any:
-        """Calculates the object points for given image points"""
+    def image_points_to_object_points(self, color_pixels: np.array, frames: rs.composite_frame) -> List[Tuple[float, float, float]]:
+        """Calculates the object points for given pixel coordinates of rgb data"""
         color_frame: rs.video_frame = frames.get_color_frame()
         depth_frame: rs.depth_frame = frames.get_depth_frame()
 
