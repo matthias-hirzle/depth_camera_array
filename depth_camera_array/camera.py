@@ -64,11 +64,22 @@ def image_points_to_object_points(color_pixels: np.array, frames: rs.composite_f
         color_to_depth_extrinsics,
         color_pixel
     ) for color_pixel in color_pixels]
-    return [rs.rs2_deproject_pixel_to_point(depth_intrinsics, pixel) for pixel in depth_pixels]
+
+    depth_data = extract_depth_data(frames)
+    object_points = []
+    for pixel in depth_pixels:
+        depth = depth_data[round(pixel[0], 0), round(pixel[1], 0)]
+        object_points.append(rs.rs2_deproject_pixel_to_point(intrin=depth_intrinsics, pixel=pixel, depth=depth))
+
+    return object_points
 
 
 def extract_color_image(frames: rs.composite_frame) -> np.ndarray:
     return np.asanyarray(frames.get_color_frame().get_data())
+
+
+def extract_depth_data(frames: rs.composite_frame) -> np.ndarray:
+    return np.asanyarray(frames.get_depth_frame().get_data())
 
 
 def _find_connected_devices(context):
