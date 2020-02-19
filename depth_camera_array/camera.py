@@ -70,7 +70,7 @@ def image_points_to_object_points(color_pixels: np.array, frames: rs.composite_f
 
 
 def extract_color_image(frames: rs.composite_frame) -> np.ndarray:
-        return np.asanyarray(frames.get_color_frame().get_data())
+    return np.asanyarray(frames.get_color_frame().get_data())
 
 
 def _find_connected_devices(context):
@@ -82,18 +82,6 @@ def _find_connected_devices(context):
 
 
 def initialize_connected_cameras() -> List[Camera]:
-    """
-    Enumerate the connected Intel RealSense devices
-    Parameters:
-    -----------
-    context 	   : rs.context()
-                     The context created for using the realsense library
-    Return:
-    -----------
-    connect_device : array
-                     Array of enumerated devices which are connected to the PC
-    """
-
     context = rs.context()
     device_ids = _find_connected_devices(context)
 
