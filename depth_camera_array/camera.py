@@ -6,8 +6,8 @@ from pyrealsense2 import pyrealsense2 as rs
 
 class DepthCamera:
     def __init__(self, device_id: str, context: rs.context):
-        resolution_width = 640
-        resolution_height = 480
+        resolution_width = 1280
+        resolution_height = 720
         frame_rate = 30
         print(device_id)
         self._device_id = device_id
