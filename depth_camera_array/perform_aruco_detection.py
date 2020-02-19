@@ -1,6 +1,8 @@
 import argparse
 
 # from depth_camera_array.camera import initialize_connected_cameras
+from typing import List, Tuple
+
 from depth_camera_array.utilities import get_or_create_data_path
 
 
@@ -13,6 +15,9 @@ def parse_args() -> argparse.Namespace:
 
 def main():
     args = parse_args()
+
+def dump_arcuro_data(id_array: List[str], coordinate_array: List[Tuple[int, int, int]]):
+    pass
 
 
 if __name__ == '__main__':
