@@ -1,5 +1,7 @@
 import argparse
 import os
+import json
+from pprint import pprint
 
 import numpy as np
 import pyrealsense2 as rs
@@ -45,6 +47,16 @@ def check_single_rgb():
     cv2.imwrite('/home/matze/projects/depth_camera_array/data/single.png', color_image)
     pipeline.stop()
 
+
+# read data from multiple files
+def read_aruco_data():
+    data = []
+    directory = ""
+
+    for filename in os.listdir(directory):
+        if filename.endswith("_reference_points.json"):
+            f = open(filename)
+            data.append(json.loads(f.read()))
 
 def main():
     """Creates a camera setup file containing camera ids and extrinsic information"""
