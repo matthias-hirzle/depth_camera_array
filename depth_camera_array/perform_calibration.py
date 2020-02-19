@@ -24,7 +24,7 @@ def dump_scene(base_path: str):
         cameras = initialize_connected_cameras()
         for camera in cameras:
             for k, v in camera.poll_frames().items():
-                v.dump(f'{base_path}/{camera._device_id}_{k}')
+                v.dump(os.path.join({base_path}, f'{camera._device_id}_{k}'))
                 if k == 'color':
                     cv2.imwrite(os.path.join({base_path}, f'{camera._device_id}_color.png'), v)
 
