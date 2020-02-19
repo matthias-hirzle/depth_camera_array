@@ -1,7 +1,9 @@
 import argparse
 
-# from depth_camera_array.camera import initialize_connected_cameras
 from depth_camera_array.utilities import get_or_create_data_path
+
+
+# from depth_camera_array.camera import initialize_connected_cameras
 
 
 def parse_args() -> argparse.Namespace:
