@@ -40,11 +40,11 @@ class Camera:
 
     def image_points_to_object_points(self, color_pixels: np.array, frames: rs.composite_frame) -> Any:
         """Calculates the object points for given image points"""
-        color: rs.video_frame = frames.get_color_frame()
-        depth: rs.depth_frame = frames.get_depth_frame()
+        color_frame: rs.video_frame = frames.get_color_frame()
+        depth_frame: rs.depth_frame = frames.get_depth_frame()
 
-        color_profile = color.get_profile().as_video_stream_profile()
-        depth_profile = depth.get_profile().as_video_stream_profile()
+        color_profile = color_frame.get_profile().as_video_stream_profile()
+        depth_profile = depth_frame.get_profile().as_video_stream_profile()
 
         color_intrinsics = color_profile.get_intrinsics()
         depth_intrinsics = depth_profile.get_intrinsics()
@@ -53,7 +53,7 @@ class Camera:
         depth_to_color_extrinsics = depth_profile.get_extrinsics_to(color_profile)
 
         depth_pixels = [rs.rs2_project_color_pixel_to_depth_pixel(
-            depth.get_data(),
+            depth_frame.get_data(),
             self._depth_scale,
             0.1,
             10.0,
@@ -64,11 +64,11 @@ class Camera:
             color_pixel
         ) for color_pixel in color_pixels]
 
-        depth_data = extract_depth_data(frames)
         object_points = []
         for pixel in depth_pixels:
-            depth = depth_data[int(round(pixel[0], 0)), int(round(pixel[1], 0))]
-            object_points.append(rs.rs2_deproject_pixel_to_point(intrin=depth_intrinsics, pixel=pixel, depth=depth))
+            depth = depth_frame.get_distance(int(round(pixel[0], 0)), int(round(pixel[1], 0)))
+            # depth = depth_data[int(round(pixel[0], 0)), int(round(pixel[1], 0))]
+            object_points.append(rs.rs2_deproject_pixel_to_point(intrin=depth_intrinsics, pixel=pixel, depth=depth_frame))
 
         return object_points
 
