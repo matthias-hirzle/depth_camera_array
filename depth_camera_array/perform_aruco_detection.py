@@ -1,5 +1,6 @@
 import argparse
 from cv2 import aruco
+import numpy as np
 
 from depth_camera_array.camera import initialize_connected_cameras, extract_color_image
 from typing import List, Tuple
@@ -23,18 +24,19 @@ def main():
         rgb_image = extract_color_image(frames)
         aruco_dict = aruco.Dictionary_get(aruco.DICT_5X5_250)
         detected_coords, ids, _ = aruco.detectMarkers(rgb_image, aruco_dict)
-        all_3d_points = []
+        all_2d_centers = []
         for index, cam_id in enumerate(ids):  # for each found aruco-code
             act_coord = detected_coords[index]
-            centers = calc_center_coordinates(act_coord)
-            tree_dimensional_points = cam.image_points_to_object_points(centers, frames)
-            all_3d_points.append(tree_dimensional_points)
-            print(centers)
-        assert len(all_3d_points) == len(ids)
-        dump_arcuro_data(cam._device_id, ids, all_3d_points)
+            center_of_actual_code = calc_center_coordinates(act_coord)
+            all_2d_centers.append(center_of_actual_code)
+            print(center_of_actual_code)
+
+        tree_dimensional_points = cam.image_points_to_object_points(all_2d_centers, frames)
+        assert len(tree_dimensional_points) == len(ids)
+        dump_arcuro_data(cam._device_id, ids, tree_dimensional_points)
 
 
-def calc_center_coordinates(corners) -> Tuple[int, int]:
+def calc_center_coordinates(corners) -> np.array(float):
     coordinates = corners[0]
     x_sum = 0
     y_sum = 0
@@ -42,7 +44,7 @@ def calc_center_coordinates(corners) -> Tuple[int, int]:
     for coord in coordinates:
         x_sum += coord[0]
         y_sum += coord[1]
-    return [x_sum / 4, y_sum / 4]
+    return np.array([x_sum / 4, y_sum / 4])
 
 def dump_arcuro_data(camera_id: str, code_id_array: List[str], coordinate_array: List[Tuple[int, int, int]]):
     pass
