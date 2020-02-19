@@ -20,8 +20,8 @@ class Camera:
         # self._config.enable_stream(rs.stream.infrared, 1, resolution_width, resolution_height, rs.format.y8, frame_rate)
         self._config.enable_stream(rs.stream.color, resolution_width, resolution_height, rs.format.bgr8, frame_rate)
 
-        self._pipeline.start(self._config)
-
+        self._pipeline_profile: rs.pipeline_profile = self._pipeline.start(self._config)
+        self._depth_scale = self._pipeline_profile.get_device().first_depth_sensor().get_depth_scale()
         # self._profile = self._pipeline.start(self._config)
 
     def poll_frames(self) -> rs.composite_frame:
@@ -38,40 +38,39 @@ class Camera:
     def close(self):
         self._pipeline.stop()
 
+    def image_points_to_object_points(self, color_pixels: np.array, frames: rs.composite_frame) -> Any:
+        """Calculates the object points for given image points"""
+        color: rs.video_frame = frames.get_color_frame()
+        depth: rs.depth_frame = frames.get_depth_frame()
 
-def image_points_to_object_points(color_pixels: np.array, frames: rs.composite_frame) -> Any:
-    """Calculates the object points for given image points"""
-    color: rs.video_frame = frames.get_color_frame()
-    depth: rs.depth_frame = frames.get_depth_frame()
+        color_profile = color.get_profile().as_video_stream_profile()
+        depth_profile = depth.get_profile().as_video_stream_profile()
 
-    color_profile: rs.stream_profile = color.get_profile()
-    depth_profile = depth.get_profile()
+        color_intrinsics = color_profile.get_intrinsics()
+        depth_intrinsics = depth_profile.get_intrinsics()
 
-    color_intrinsics: rs.intrinsics = color_profile.as_video_stream_profile().get_intrinsics()
-    depth_intrinsics: rs.intrinsics = depth_profile.as_video_stream_profile().get_intrinsics()
+        color_to_depth_extrinsics = color_profile.get_extrinsics_to(depth_profile)
+        depth_to_color_extrinsics = depth_profile.get_extrinsics_to(color_profile)
 
-    color_to_depth_extrinsics: rs.extrinsics = color_profile.as_video_stream_profile().get_extrinsics_to(depth_profile)
-    depth_to_color_extrinsics: rs.extrinsics = depth_profile.as_video_stream_profile().get_extrinsics_to(color_profile)
+        depth_pixels = [rs.rs2_project_color_pixel_to_depth_pixel(
+            depth.get_data(),
+            self._depth_scale,
+            0.1,
+            10.0,
+            depth_intrinsics,
+            color_intrinsics,
+            depth_to_color_extrinsics,
+            color_to_depth_extrinsics,
+            color_pixel
+        ) for color_pixel in color_pixels]
 
-    depth_pixels = [rs.rs2_project_color_pixel_to_depth_pixel(
-        depth.get_data(),
-        1.0,
-        0.1,
-        10.0,
-        depth_intrinsics,
-        color_intrinsics,
-        depth_to_color_extrinsics,
-        color_to_depth_extrinsics,
-        color_pixel
-    ) for color_pixel in color_pixels]
+        depth_data = extract_depth_data(frames)
+        object_points = []
+        for pixel in depth_pixels:
+            depth = depth_data[int(round(pixel[0], 0)), int(round(pixel[1], 0))]
+            object_points.append(rs.rs2_deproject_pixel_to_point(intrin=depth_intrinsics, pixel=pixel, depth=depth))
 
-    depth_data = extract_depth_data(frames)
-    object_points = []
-    for pixel in depth_pixels:
-        depth = depth_data[round(pixel[0], 0), round(pixel[1], 0)]
-        object_points.append(rs.rs2_deproject_pixel_to_point(intrin=depth_intrinsics, pixel=pixel, depth=depth))
-
-    return object_points
+        return object_points
 
 
 def extract_color_image(frames: rs.composite_frame) -> np.ndarray:
