@@ -4,7 +4,7 @@ import os
 from cv2 import aruco
 import json
 
-from depth_camera_array.camera import initialize_connected_cameras, extract_color_image, image_points_to_object_points
+from depth_camera_array.camera import initialize_connected_cameras, extract_color_image
 from typing import List, Tuple
 
 from depth_camera_array.utilities import get_or_create_data_path
@@ -23,7 +23,7 @@ def main():
     for cam in cameras:
         frames = cam.poll_frames()
         all_2d_centers_of_arucos, all_detected_aruco_ids = read_aruco_codes_from_frame(frames)
-        tree_dimensional_points = image_points_to_object_points(all_2d_centers_of_arucos, frames)
+        tree_dimensional_points = cam.image_points_to_object_points(all_2d_centers_of_arucos, frames)
         assert len(tree_dimensional_points) == len(all_detected_aruco_ids)
         dump_arcuro_data(cam._device_id, all_detected_aruco_ids, tree_dimensional_points, args.base_path)
 
