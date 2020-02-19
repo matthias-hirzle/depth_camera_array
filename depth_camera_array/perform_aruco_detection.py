@@ -16,7 +16,7 @@ def parse_args() -> argparse.Namespace:
 def main():
     args = parse_args()
 
-def dump_arcuro_data(id_array: List[str], coordinate_array: List[Tuple[int, int, int]]):
+def dump_arcuro_data(camera_id: str, code_id_array: List[str], coordinate_array: List[Tuple[int, int, int]]):
     pass
 
 
