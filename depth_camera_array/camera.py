@@ -67,8 +67,7 @@ class Camera:
         object_points = []
         for pixel in depth_pixels:
             depth = depth_frame.get_distance(int(round(pixel[0], 0)), int(round(pixel[1], 0)))
-            # depth = depth_data[int(round(pixel[0], 0)), int(round(pixel[1], 0))]
-            object_points.append(rs.rs2_deproject_pixel_to_point(intrin=depth_intrinsics, pixel=pixel, depth=depth_frame))
+            object_points.append(rs.rs2_deproject_pixel_to_point(intrin=depth_intrinsics, pixel=pixel, depth=depth))
 
         return object_points
 
