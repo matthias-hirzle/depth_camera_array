@@ -4,7 +4,7 @@ import numpy as np
 from pyrealsense2 import pyrealsense2 as rs
 
 
-class DepthCamera:
+class Camera:
     def __init__(self, device_id: str, context: rs.context):
         resolution_width = 640
         resolution_height = 480
@@ -45,7 +45,7 @@ def _find_connected_devices(context):
     return devices
 
 
-def initialize_connected_cameras() -> List[DepthCamera]:
+def initialize_connected_cameras() -> List[Camera]:
     """
     Enumerate the connected Intel RealSense devices
     Parameters:
@@ -61,5 +61,5 @@ def initialize_connected_cameras() -> List[DepthCamera]:
     context = rs.context()
     device_ids = _find_connected_devices(context)
 
-    devices = [DepthCamera(device_id, context) for device_id in device_ids]
+    devices = [Camera(device_id, context) for device_id in device_ids]
     return devices
