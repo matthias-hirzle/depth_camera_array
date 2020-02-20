@@ -9,7 +9,7 @@ from depth_camera_array.utilities import get_or_create_data_dir, load_json_to_di
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser('Performes an extrinsic calibration for all available cameras')
+    parser = argparse.ArgumentParser('Performes an extrinsic calibration for each available camera')
     parser.add_argument('--data_dir', type=str, required=False, help='Data location to load and dump config files',
                         default=get_or_create_data_dir())
     return parser.parse_args()
