@@ -1,9 +1,10 @@
 import json
 import os
+import pathlib
 
 
 def get_or_create_data_dir() -> str:
-    path = os.path.join(os.getcwd(), '..', 'data')
+    path = os.path.join(pathlib.Path(__file__).parent.absolute(), '..', 'data')
     if not os.path.exists(path):
         os.makedirs(path)
     return path
