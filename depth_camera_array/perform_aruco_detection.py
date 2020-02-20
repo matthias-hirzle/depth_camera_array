@@ -6,7 +6,7 @@ from typing import List, Tuple
 from cv2 import aruco
 
 from depth_camera_array.camera import initialize_connected_cameras, extract_color_image, close_connected_cameras
-from depth_camera_array.utilities import get_or_create_data_dir
+from depth_camera_array.utilities import get_or_create_data_dir, dump_dict_as_json
 
 
 def parse_args() -> argparse.Namespace:
@@ -39,7 +39,7 @@ def read_aruco_codes_from_frame(frames):
             act_coord = detected_coords[index]
             center_of_actual_code = calc_center_coordinates(act_coord)
             all_2d_centers.append(center_of_actual_code)
-        ids = [id[0] for id in ids]
+        ids = [int(id[0]) for id in ids]
     else:
         print('NO Codes detected for actual Camera!!!')
         ids = []  # return an empty list instead of none
@@ -65,8 +65,7 @@ def dump_arcuro_data(camera_id: str, code_id_array: List[str], coordinate_array:
     new_dict.update(centers=coordinate_array)
 
     # write to a file
-    with open(os.path.join(data_dir, f'{camera_id}_reference_points.json'), 'w')as json_file:
-        json.dump(new_dict, json_file)
+    dump_dict_as_json(new_dict, os.path.join(data_dir, f'{camera_id}_reference_points.json'))
 
 
 if __name__ == '__main__':
