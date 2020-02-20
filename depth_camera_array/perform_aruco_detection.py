@@ -39,7 +39,7 @@ def read_aruco_codes_from_frame(frames):
             act_coord = detected_coords[index]
             center_of_actual_code = calc_center_coordinates(act_coord)
             all_2d_centers.append(center_of_actual_code)
-        ids = ids.tolist()
+        ids = [id[0] for id in ids]
     else:
         print('NO Codes detected for actual Camera!!!')
         ids = []  # return an empty list instead of none
