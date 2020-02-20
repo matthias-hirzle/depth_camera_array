@@ -32,12 +32,19 @@ def read_aruco_codes_from_frame(frames):
     rgb_image = extract_color_image(frames)
     aruco_dict = aruco.Dictionary_get(aruco.DICT_5X5_250)
     detected_coords, ids, _ = aruco.detectMarkers(rgb_image, aruco_dict)
+    print('< camera id | detected codes >')
+    print(ids)
     all_2d_centers = []
-    for index, cam_id in enumerate(ids):  # for each found aruco-code
-        act_coord = detected_coords[index]
-        center_of_actual_code = calc_center_coordinates(act_coord)
-        all_2d_centers.append(center_of_actual_code)
-    return all_2d_centers, ids.tolist()
+    if ids is not None:
+        for index, cam_id in enumerate(ids):  # for each found aruco-code
+            act_coord = detected_coords[index]
+            center_of_actual_code = calc_center_coordinates(act_coord)
+            all_2d_centers.append(center_of_actual_code)
+        ids = ids.tolist()
+    else:
+        print('NO Codes detected for actual Camera!!!')
+        ids = []  # return an empty list instead of none
+    return all_2d_centers, ids
 
 
 def calc_center_coordinates(corners) -> List[float]:
