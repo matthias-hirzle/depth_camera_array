@@ -52,7 +52,6 @@ def calculate_transformation_kabsch(src_points: np.ndarray, dst_points: np.ndarr
     src_points = src_points.transpose()
     dst_points = dst_points.transpose()
     assert src_points.shape == dst_points.shape
-    print(src_points.shape)
     if src_points.shape[0] != 3:
         raise Exception("The input data matrix had to be transposed in order to compute transformation.")
 
@@ -178,7 +177,6 @@ def main():
     aruco_data = read_aruco_data(args.data_dir)
     transformations = generate_extrinsics(aruco_data)
     dump_dict_as_json(transformations, os.path.join(args.data_dir, 'camera_array.json'))
-    print(os.path.realpath(__file__))
 
 
 if __name__ == '__main__':
