@@ -1,6 +1,9 @@
 import argparse
 import math
+import os
 from typing import Any
+
+from depth_camera_array import camera
 
 
 def parse_args() -> argparse.Namespace:
@@ -32,8 +35,27 @@ def remove_unnecessary_content(point_cloud: Any, bottom: float, height: float, r
     return filter(lambda item: is_in_range(item, bottom, height, radius), point_cloud)
 
 
+def transform(device_id: str, point_cloud: Any, data_dir: str):
+    pass
+
+
+def dump_to_ply(merged_point_cloud):
+    pass
+
+
 def main():
     args = parse_args()
+    all_connected_cams = camera.initialize_connected_cameras()
+    for cam in all_connected_cams:
+        frames = cam.poll_frames()
+        point_cloud = cam.get_point_cloud(frames)
+        point_cloud.export_to_ply(os.path.join("C:\AutoSysLab\depth_camera_array\data", 'gedoens.ply'), frames.get_color_frame())
+
+        #transform(cam.device_id, point_cloud, args.data_dir)
+        #remove_unnecessary_content(point_cloud, args.bottom, args.height, args.radius)
+    # merge point clouds
+    merged_point_cloud = None
+    #dump_to_ply(merged_point_cloud, args.data_dir)  # TODO move to Util
 
 
 if __name__ == '__main__':
