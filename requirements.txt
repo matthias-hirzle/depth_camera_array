@@ -1,3 +1,4 @@
 pyrealsense2
 opencv-contrib-python
 numpy
+rmsd
