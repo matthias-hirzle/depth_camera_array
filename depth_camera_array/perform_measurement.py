@@ -1,4 +1,5 @@
 import argparse
+from typing import Any
 
 
 def parse_args() -> argparse.Namespace:
@@ -9,6 +10,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--radius', type=int, help='Radius of the measurement sphere in mm')
     parser.add_argument('--data_dir', type=str, help='Data location to load and dump config files')
     return parser.parse_args()
+
+
+def remove_unnecessary_content(point_cloud: Any, bottom: float, height: float, radius: float) -> Any:
+    """Removes points that are not in range"""
+    pass
 
 
 def main():
