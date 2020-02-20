@@ -124,12 +124,35 @@ def calculate_relative_transformations(aruco_data: dict, base_camera: str) -> Di
 def calculate_absolute_transformations(relative_transformations: Dict[str, np.array], aruco_data: dict,
                                        base_camera: str) -> Dict[str, np.array]:
     # find bottom markers
+    markers = aruco_data[base_camera]['aruco']
+    points = aruco_data[base_camera]['centers']
+    bottom_points = []
+    marker_points = []
+    for item in zip(markers, points):
+        if item[0] < 20:
+            bottom_points.append(item[1])
+        else:
+            marker_points.append(item[1])
+    assert len(bottom_points) > 2
 
-    # create l2 norm
+    # estimate destination direction
+    reference_point = np.array(marker_points[0])
+    edge_points = list(map(lambda item: np.array(item), bottom_points[:3]))
 
-    # check direction of l2 norm
+    dest_y = np.cross(edge_points[0] - edge_points[1], edge_points[0] - edge_points[2])
+    dest_center = (edge_points[0] + edge_points[1] + edge_points[2]) / (-3)
+    dest_x = edge_points[0] - dest_center
 
-    #
+    # eventualy invert direction
+    if np.linalg.norm(reference_point - dest_y) > np.linalg.norm(reference_point + dest_y):
+        dest_y = dest_y * (-1)
+
+    src_x = np.array([np.linalg.norm(dest_x), 0.0, 0.0])
+    src_y = np.array([0.0, np.linalg.norm(dest_y), 0.0])
+    src_center = np.array([0.0, 0.0, 0.0])
+
+    calculate_transformation_kabsch(np.array([src_x, src_y, src_center]), np.array([dest_x, dest_y, dest_center]))
+    # rotation
     return relative_transformations
 
 
