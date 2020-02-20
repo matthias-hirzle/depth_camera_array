@@ -2,6 +2,7 @@ from typing import List, Tuple
 
 import numpy as np
 from pyrealsense2 import pyrealsense2 as rs
+#rom pyrealsense2 import pointcloud as pc
 
 
 class Camera:
@@ -65,6 +66,14 @@ class Camera:
             object_points.append(rs.rs2_deproject_pixel_to_point(intrin=depth_intrinsics, pixel=pixel, depth=depth))
 
         return object_points
+
+    def get_point_cloud(self, frames: rs.composite_frame) -> rs.points:
+        pc = rs.pointcloud()
+        color_frame = frames.get_color_frame()
+        pc.map_to(color_frame)
+        depth_frame = frames.get_depth_frame()
+        point_cloud = pc.calculate(depth_frame)
+        return point_cloud
 
 
 def extract_color_image(frames: rs.composite_frame) -> np.ndarray:
