@@ -151,9 +151,15 @@ def calculate_absolute_transformations(relative_transformations: Dict[str, np.ar
     src_y = np.array([0.0, np.linalg.norm(dest_y), 0.0])
     src_center = np.array([0.0, 0.0, 0.0])
 
-    calculate_transformation_kabsch(np.array([src_x, src_y, src_center]), np.array([dest_x, dest_y, dest_center]))
-    # rotation
-    return relative_transformations
+    transformation, rmsd_value = calculate_transformation_kabsch(np.array([src_x, src_y, src_center]),
+                                                                 np.array([dest_x, dest_y, dest_center]))
+    print("RMS error for calibration to real world system is :", rmsd_value, "m")
+
+    final_transformations = {}
+    for k, v in relative_transformations.items():
+        final_transformations[k] = np.dot(transformation, v)
+
+    return final_transformations
 
 
 def generate_extrinsics(aruco_data: dict) -> dict:
