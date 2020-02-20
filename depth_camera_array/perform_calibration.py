@@ -1,6 +1,8 @@
 import argparse
 import os
+from typing import Tuple, Dict
 
+import numpy as np
 import rmsd
 
 from depth_camera_array.utilities import get_or_create_data_dir, load_json_to_dict
@@ -8,7 +10,8 @@ from depth_camera_array.utilities import get_or_create_data_dir, load_json_to_di
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser('Performes an extrinsic calibration for all available cameras')
-    parser.add_argument('--data_dir', type=str, required=False, help='Data location to load and dump config files', default=get_or_create_data_dir())
+    parser.add_argument('--data_dir', type=str, required=False, help='Data location to load and dump config files',
+                        default=get_or_create_data_dir())
     return parser.parse_args()
 
 
@@ -24,10 +27,12 @@ def read_aruco_data(data_dir: str):
                     'centers': calibration_data['centers']
                 }
             }
+
     return calibration_data
 
 
-def calculate_transformation_kabsch(src_points, dst_points):
+def calculate_transformation_kabsch(src_points: np.ndarray, dst_points: np.ndarray) -> Tuple[
+    np.array, float]:
     """
     Calculates the optimal rigid transformation from src_points to
     dst_points
@@ -63,20 +68,82 @@ def calculate_transformation_kabsch(src_points, dst_points):
 
     translation_vector = rmsd.centroid(dst_points) - np.matmul(rmsd.centroid(src_points), rotation_matrix)
 
-    return rotation_matrix.transpose(), translation_vector.transpose(), rmsd_value
+    return create_homogenous(rotation_matrix.transpose(), translation_vector.transpose()), rmsd_value
+
+
+def create_homogenous(rotation_matrix: np.array, translation_vector: np.array) -> np.array:
+    # TODO
+    pass
+
+
+def define_base_camera(aruco_data: dict) -> str:
+    base_camera = None
+    arucos = 0
+    bottom_arucos = set(range(20))
+    for k, v in aruco_data.items():
+        intersected = len(bottom_arucos.intersection(set(v['aruco'])))
+        if intersected > arucos:
+            arucos = intersected
+            base_camera = k
+    assert arucos > 2
+    return base_camera
+
+
+def calculate_relative_transformations(aruco_data: dict, base_camera: str) -> Dict[str, np.array]:
+    transformations = {
+        base_camera: np.array(
+            [[1, 0, 0, 0],
+             [0, 1, 0, 0],
+             [0, 0, 1, 0],
+             [0, 0, 0, 1]],
+            dtype=float)
+    }
+    source_arucos = aruco_data[base_camera]['aruco']
+    source_points = aruco_data[base_camera]['centers']
+    for k, v in aruco_data.items():
+        if not k == base_camera:
+            # 1. intersect arucos
+            dest_arucos = v['aruco']
+            dest_points = v['centers']
+            intersection = set(source_arucos).intersection(set(dest_arucos))
+            # 2. create two sorted lists of points
+            assert len(intersection) > 2
+            source_sorted = []
+            dest_sorted = []
+            for aruco_id in intersection:
+                source_sorted.append(source_points[source_arucos.index(aruco_id)])
+                dest_sorted.append(dest_points[dest_arucos.index(aruco_id)])
+
+            transformation, rmsd_value = calculate_transformation_kabsch(np.array(source_sorted), np.array(dest_sorted))
+            print("RMS error for calibration with device number", k, "is :", rmsd_value, "m")
+            transformations[k] = transformation
+
+    return transformations
+
+
+def calculate_absolute_transformations(relative_transformations: Dict[str, np.array], aruco_data: dict,
+                                       base_camera: str):
+    # TODO
+    pass
+
+
+def generate_extrinsics(aruco_data: dict) -> dict:
+    # 1. define base_camera
+    base_camera = define_base_camera(aruco_data)
+    relative_transformations = calculate_relative_transformations(aruco_data, base_camera)
+
+    # 3. calculate extrinsics to world coordinates
 
 
 def main():
     """Creates a camera setup file containing camera ids and extrinsic information"""
     args = parse_args()
-    # 1. read aruco data
 
-    # 2. Take frames rgb and depth for each camera
-    # 3. qr detection through calibrator
-    # 4. intersection of detected points through qr id
+    # 1. read aruco data
+    aruco_data = read_aruco_data(args.data_dir)
+
     # 5. generate extrinsics
-    # 6. take frames from bottom
-    # 7. determine direction of z-axis
+
     # 8. adjust all extrinsics
     # 9. dump extrinsics and device ids for next step.
 
