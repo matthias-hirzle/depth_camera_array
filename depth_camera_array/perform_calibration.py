@@ -5,7 +5,7 @@ from typing import Tuple, Dict
 import numpy as np
 import rmsd
 
-from depth_camera_array.utilities import get_or_create_data_dir, load_json_to_dict
+from depth_camera_array.utilities import get_or_create_data_dir, load_json_to_dict, dump_dict_as_json
 
 
 def parse_args() -> argparse.Namespace:
@@ -20,19 +20,15 @@ def read_aruco_data(data_dir: str):
     calibration_data = {}
     for file in os.listdir(data_dir):
         if file.endswith("_reference_points.json"):
-            reference_points = load_json_to_dict(file)
-            calibration_data['camera_id'] = {
-                {
-                    'aruco': calibration_data['aruco'],
-                    'centers': calibration_data['centers']
-                }
+            reference_points = load_json_to_dict(os.path.join(data_dir, file))
+            calibration_data[reference_points['camera_id']] = {
+                'aruco': reference_points['aruco'],
+                'centers': reference_points['centers']
             }
-
     return calibration_data
 
 
-def calculate_transformation_kabsch(src_points: np.ndarray, dst_points: np.ndarray) -> Tuple[
-    np.array, float]:
+def calculate_transformation_kabsch(src_points: np.ndarray, dst_points: np.ndarray) -> Tuple[np.array, float]:
     """
     Calculates the optimal rigid transformation from src_points to
     dst_points
@@ -53,7 +49,10 @@ def calculate_transformation_kabsch(src_points: np.ndarray, dst_points: np.ndarr
         (3,1) matrix
     rmsd_value: float
     """
+    src_points = src_points.transpose()
+    dst_points = dst_points.transpose()
     assert src_points.shape == dst_points.shape
+    print(src_points.shape)
     if src_points.shape[0] != 3:
         raise Exception("The input data matrix had to be transposed in order to compute transformation.")
 
@@ -72,8 +71,9 @@ def calculate_transformation_kabsch(src_points: np.ndarray, dst_points: np.ndarr
 
 
 def create_homogenous(rotation_matrix: np.array, translation_vector: np.array) -> np.array:
-    # TODO
-    pass
+    homogenous = np.append(rotation_matrix, [[vec] for vec in translation_vector], axis=1)
+    homogenous = np.append(homogenous, np.array([[0, 0, 0, 1]]), axis=0)
+    return homogenous
 
 
 def define_base_camera(aruco_data: dict) -> str:
@@ -122,30 +122,34 @@ def calculate_relative_transformations(aruco_data: dict, base_camera: str) -> Di
 
 
 def calculate_absolute_transformations(relative_transformations: Dict[str, np.array], aruco_data: dict,
-                                       base_camera: str):
-    # TODO
-    pass
+                                       base_camera: str) -> Dict[str, np.array]:
+    # find bottom markers
+
+    # create l2 norm
+
+    # check direction of l2 norm
+
+    #
+    return relative_transformations
 
 
 def generate_extrinsics(aruco_data: dict) -> dict:
     # 1. define base_camera
     base_camera = define_base_camera(aruco_data)
     relative_transformations = calculate_relative_transformations(aruco_data, base_camera)
-
-    # 3. calculate extrinsics to world coordinates
+    final_transformations = calculate_absolute_transformations(relative_transformations, aruco_data, base_camera)
+    for k, v in final_transformations.items():
+        final_transformations[k] = v.tolist()
+    return final_transformations
 
 
 def main():
     """Creates a camera setup file containing camera ids and extrinsic information"""
     args = parse_args()
-
-    # 1. read aruco data
     aruco_data = read_aruco_data(args.data_dir)
-
-    # 5. generate extrinsics
-
-    # 8. adjust all extrinsics
-    # 9. dump extrinsics and device ids for next step.
+    transformations = generate_extrinsics(aruco_data)
+    dump_dict_as_json(transformations, os.path.join(args.data_dir, 'camera_array.json'))
+    print(os.path.realpath(__file__))
 
 
 if __name__ == '__main__':

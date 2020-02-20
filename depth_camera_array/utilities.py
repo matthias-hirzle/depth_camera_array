@@ -17,6 +17,6 @@ def dump_dict_as_json(data: dict, path: str):
 
 
 def load_json_to_dict(path) -> dict:
-    with open(path, 'w') as f:
+    with open(path, 'r') as f:
         data = json.load(f)
     return data
