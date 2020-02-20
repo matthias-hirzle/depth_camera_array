@@ -1,1 +1,1 @@
-pyton -m depth_camera_array.perform_calibration.py
+pyton -m depth_camera_array.perform_mesh_generation

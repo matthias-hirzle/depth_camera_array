@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import List, Tuple
 
 import numpy as np
 from pyrealsense2 import pyrealsense2 as rs
@@ -9,37 +9,29 @@ class Camera:
         resolution_width = 1280
         resolution_height = 720
         frame_rate = 30
-        print(device_id)
-        self._device_id = device_id
+
+        self.device_id = device_id
         self._context = context
 
         self._pipeline = rs.pipeline()
         self._config = rs.config()
-        self._config.enable_device(self._device_id)
+        self._config.enable_device(self.device_id)
         self._config.enable_stream(rs.stream.depth, resolution_width, resolution_height, rs.format.z16, frame_rate)
-        # self._config.enable_stream(rs.stream.infrared, 1, resolution_width, resolution_height, rs.format.y8, frame_rate)
         self._config.enable_stream(rs.stream.color, resolution_width, resolution_height, rs.format.bgr8, frame_rate)
 
         self._pipeline_profile: rs.pipeline_profile = self._pipeline.start(self._config)
         self._depth_scale = self._pipeline_profile.get_device().first_depth_sensor().get_depth_scale()
-        # self._profile = self._pipeline.start(self._config)
 
     def poll_frames(self) -> rs.composite_frame:
         """Returns a frames object with each available frame type"""
-        # streams = self._profile.get_streams()
-        # color = rs.pipeline_profile.get_stream(self._profile, rs.stream.color)
         frames = self._pipeline.wait_for_frames()
-        # return {
-        #     'color': np.asanyarray(frames.get_color_frame().get_data()),
-        #     'depth': np.asanyarray(frames.get_depth_frame().get_data())
-        # }
         return frames
 
     def close(self):
         self._pipeline.stop()
 
-    def image_points_to_object_points(self, color_pixels: np.array, frames: rs.composite_frame) -> Any:
-        """Calculates the object points for given image points"""
+    def image_points_to_object_points(self, color_pixels: np.array, frames: rs.composite_frame) -> List[Tuple[float, float, float]]:
+        """Calculates the object points for given pixel coordinates of rgb data"""
         color_frame: rs.video_frame = frames.get_color_frame()
         depth_frame: rs.depth_frame = frames.get_depth_frame()
 
@@ -52,17 +44,20 @@ class Camera:
         color_to_depth_extrinsics = color_profile.get_extrinsics_to(depth_profile)
         depth_to_color_extrinsics = depth_profile.get_extrinsics_to(color_profile)
 
-        depth_pixels = [rs.rs2_project_color_pixel_to_depth_pixel(
-            depth_frame.get_data(),
-            self._depth_scale,
-            0.1,
-            10.0,
-            depth_intrinsics,
-            color_intrinsics,
-            depth_to_color_extrinsics,
-            color_to_depth_extrinsics,
-            color_pixel
-        ) for color_pixel in color_pixels]
+        depth_pixels = [
+            rs.rs2_project_color_pixel_to_depth_pixel(
+                data=depth_frame.get_data(),
+                depth_scale=self._depth_scale,
+                depth_min=0.1,
+                depth_max=10.0,
+                depth_intrin=depth_intrinsics,
+                color_intrin=color_intrinsics,
+                depth_to_color=depth_to_color_extrinsics,
+                color_to_depth=color_to_depth_extrinsics,
+                from_pixel=color_pixel
+            )
+            for color_pixel in color_pixels
+        ]
 
         object_points = []
         for pixel in depth_pixels:
@@ -74,10 +69,6 @@ class Camera:
 
 def extract_color_image(frames: rs.composite_frame) -> np.ndarray:
     return np.asanyarray(frames.get_color_frame().get_data())
-
-
-def extract_depth_data(frames: rs.composite_frame) -> np.ndarray:
-    return np.asanyarray(frames.get_depth_frame().get_data())
 
 
 def _find_connected_devices(context):
