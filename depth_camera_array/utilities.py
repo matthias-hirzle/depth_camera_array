@@ -1,6 +1,5 @@
 import json
 import os
-import pathlib
 
 
 def get_or_create_data_dir() -> str:
