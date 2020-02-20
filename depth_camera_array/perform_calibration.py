@@ -98,23 +98,23 @@ def calculate_relative_transformations(aruco_data: dict, base_camera: str) -> Di
              [0, 0, 0, 1]],
             dtype=float)
     }
-    source_arucos = aruco_data[base_camera]['aruco']
-    source_points = aruco_data[base_camera]['centers']
+    dst_arucos = aruco_data[base_camera]['aruco']
+    dst_points = aruco_data[base_camera]['centers']
     for k, v in aruco_data.items():
         if not k == base_camera:
             # 1. intersect arucos
-            dest_arucos = v['aruco']
-            dest_points = v['centers']
-            intersection = set(source_arucos).intersection(set(dest_arucos))
+            src_arucos = v['aruco']
+            src_points = v['centers']
+            intersection = set(dst_arucos).intersection(set(src_arucos))
             # 2. create two sorted lists of points
             assert len(intersection) > 2
-            source_sorted = []
-            dest_sorted = []
+            dst_sorted = []
+            src_sorted = []
             for aruco_id in intersection:
-                source_sorted.append(source_points[source_arucos.index(aruco_id)])
-                dest_sorted.append(dest_points[dest_arucos.index(aruco_id)])
+                dst_sorted.append(dst_points[dst_arucos.index(aruco_id)])
+                src_sorted.append(src_points[src_arucos.index(aruco_id)])
 
-            transformation, rmsd_value = calculate_transformation_kabsch(np.array(source_sorted), np.array(dest_sorted))
+            transformation, rmsd_value = calculate_transformation_kabsch(np.array(src_sorted), np.array(dst_sorted))
             print("RMS error for calibration with device number", k, "is :", rmsd_value, "m")
             transformations[k] = transformation
 
