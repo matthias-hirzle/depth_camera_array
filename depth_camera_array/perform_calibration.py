@@ -49,8 +49,6 @@ def calculate_transformation_kabsch(src_points: np.ndarray, dst_points: np.ndarr
         (3,1) matrix
     rmsd_value: float
     """
-    src_points = src_points.transpose()
-    dst_points = dst_points.transpose()
     assert src_points.shape == dst_points.shape
     if src_points.shape[0] != 3:
         raise Exception("The input data matrix had to be transposed in order to compute transformation.")
@@ -113,7 +111,8 @@ def calculate_relative_transformations(aruco_data: dict, base_camera: str) -> Di
                 dst_sorted.append(dst_points[dst_arucos.index(aruco_id)])
                 src_sorted.append(src_points[src_arucos.index(aruco_id)])
 
-            transformation, rmsd_value = calculate_transformation_kabsch(np.array(src_sorted), np.array(dst_sorted))
+            transformation, rmsd_value = calculate_transformation_kabsch(np.array(src_sorted).transpose(),
+                                                                         np.array(dst_sorted).transpose())
             print("RMS error for calibration with device number", k, "is :", rmsd_value, "m")
             transformations[k] = transformation
 
@@ -136,28 +135,29 @@ def calculate_absolute_transformations(relative_transformations: Dict[str, np.ar
 
     # estimate destination direction
     reference_point = np.array(marker_points[0])
-    edge_points = list(map(lambda item: np.array(item), bottom_points[:3]))
+    edge_points = np.array(list(map(lambda item: np.array(item), bottom_points[:3])))
 
-    dest_y = np.cross(edge_points[0] - edge_points[1], edge_points[0] - edge_points[2])
-    dest_center = (edge_points[0] + edge_points[1] + edge_points[2]) / (-3)
-    dest_x = edge_points[0] - dest_center
+    # 1. normale
+    norm = np.cross(edge_points[0] - edge_points[1], edge_points[0] - edge_points[2])
+    if np.linalg.norm(reference_point - norm) > np.linalg.norm(reference_point + norm):
+        norm = norm * (-1)
 
-    # eventualy invert direction
-    if np.linalg.norm(reference_point - dest_y) > np.linalg.norm(reference_point + dest_y):
-        dest_y = dest_y * (-1)
+    src_center = edge_points[0]
+    src_x = edge_points[1]
+    src_y = src_center + norm
 
-    src_x = np.array([np.linalg.norm(dest_x), 0.0, 0.0])
-    src_y = np.array([0.0, np.linalg.norm(dest_y), 0.0])
-    src_center = np.array([0.0, 0.0, 0.0])
+    dst_center = np.array([0., 0., 0.])
+    dst_x = np.array([np.linalg.norm(src_center - src_x), 0., 0.])
+    dst_y = np.array([0., abs(np.linalg.norm(norm)), 0.])
 
-    transformation, rmsd_value = calculate_transformation_kabsch(np.array([src_x, src_y, src_center]),
-                                                                 np.array([dest_x, dest_y, dest_center]))
+    src_points = np.array([src_x, src_y, src_center])
+    dst_points = np.array([dst_x, dst_y, dst_center])
+    transformation, rmsd_value = calculate_transformation_kabsch(src_points.transpose(), dst_points.transpose())
     print("RMS error for calibration to real world system is :", rmsd_value, "m")
 
     final_transformations = {}
     for k, v in relative_transformations.items():
         final_transformations[k] = np.dot(transformation, v)
-
     return final_transformations
 
 
@@ -177,6 +177,20 @@ def main():
     aruco_data = read_aruco_data(args.data_dir)
     transformations = generate_extrinsics(aruco_data)
     dump_dict_as_json(transformations, os.path.join(args.data_dir, 'camera_array.json'))
+
+    p1 = np.array([1, 0, 0])
+    p2 = np.array([0, 0, 0])
+    p3 = np.array([0, 1, 0])
+    p4 = np.array([0, 0, 1])
+    src = np.array([p1, p1, p2, p3]).transpose()
+    dst = np.array([p1, p1, p2, p4]).transpose()
+    mat, err = calculate_transformation_kabsch(src, dst)
+
+    homop = np.ones(4)
+    homop[:3] = p3
+    p5 = mat.dot(homop)
+
+    pass
 
 
 if __name__ == '__main__':
