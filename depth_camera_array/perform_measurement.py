@@ -1,4 +1,5 @@
 import argparse
+import math
 from typing import Any
 
 
@@ -12,9 +13,23 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def is_in_range(point: Any, bottom: float, height: float, radius: float) -> bool:
+    # √x2 + z2 <= r
+    a = math.sqrt(math.pow(point[0], 2) + math.pow(point[2], 2)) <= radius
+    # y < b + h
+    b = point[1] < bottom + height
+    # y > b
+    c = height > bottom
+
+    if a and b and c:
+        return True
+    else:
+        return False
+
+
 def remove_unnecessary_content(point_cloud: Any, bottom: float, height: float, radius: float) -> Any:
     """Removes points that are not in range"""
-    pass
+    return filter(lambda item: is_in_range(item, bottom, height, radius), point_cloud)
 
 
 def main():
