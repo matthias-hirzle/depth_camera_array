@@ -10,8 +10,8 @@ def get_or_create_data_dir() -> str:
 
 
 def dump_dict_as_json(data: dict, path: str):
-    if not os.path.exists(os.path.basename(path)):
-        os.makedirs(os.path.basename(path))
+    if not os.path.exists(os.path.dirname(path)):
+        os.makedirs(os.path.dirname(path))
     with open(path, 'w') as f:
         json.dump(data, f)
 
