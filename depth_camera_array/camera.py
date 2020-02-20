@@ -10,12 +10,12 @@ class Camera:
         resolution_height = 720
         frame_rate = 30
 
-        self._device_id = device_id
+        self.device_id = device_id
         self._context = context
 
         self._pipeline = rs.pipeline()
         self._config = rs.config()
-        self._config.enable_device(self._device_id)
+        self._config.enable_device(self.device_id)
         self._config.enable_stream(rs.stream.depth, resolution_width, resolution_height, rs.format.z16, frame_rate)
         self._config.enable_stream(rs.stream.color, resolution_width, resolution_height, rs.format.bgr8, frame_rate)
 

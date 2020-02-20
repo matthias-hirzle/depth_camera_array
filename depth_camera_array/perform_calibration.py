@@ -1,7 +1,6 @@
 import argparse
-import os
 import json
-from pprint import pprint
+import os
 
 import numpy as np
 import pyrealsense2 as rs
@@ -13,7 +12,8 @@ from depth_camera_array.utilities import get_or_create_data_dir
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser('Performes an extrinsic calibration for all available cameras')
-    parser.add_argument('--data_dir', type=str, required=False, help='Data location to load and dump config files', default=get_or_create_data_dir())
+    parser.add_argument('--data_dir', type=str, required=False, help='Data location to load and dump config files',
+                        default=get_or_create_data_dir())
     return parser.parse_args()
 
 
@@ -22,9 +22,9 @@ def dump_scene(data_dir: str):
         cameras = initialize_connected_cameras()
         for camera in cameras:
             for k, v in camera.poll_frames().items():
-                v.dump(os.path.join(data_dir, f'{camera._device_id}_{k}'))
+                v.dump(os.path.join(data_dir, f'{camera.device_id}_{k}'))
                 if k == 'color':
-                    cv2.imwrite(os.path.join(data_dir, f'{camera._device_id}_color.png'), v)
+                    cv2.imwrite(os.path.join(data_dir, f'{camera.device_id}_color.png'), v)
 
     except RuntimeError as error:
         print(error)
@@ -33,7 +33,6 @@ def dump_scene(data_dir: str):
 
 
 def check_single_rgb():
-
     pipeline = rs.pipeline()
     pipeline.start()
 
@@ -55,6 +54,7 @@ def read_aruco_data():
         if filename.endswith("_reference_points.json"):
             f = open(filename)
             data.append(json.loads(f.read()))
+
 
 def main():
     """Creates a camera setup file containing camera ids and extrinsic information"""
