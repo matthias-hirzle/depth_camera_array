@@ -178,19 +178,19 @@ def main():
     transformations = generate_extrinsics(aruco_data)
     dump_dict_as_json(transformations, os.path.join(args.data_dir, 'camera_array.json'))
 
-    p1 = np.array([1, 0, 0])
-    p2 = np.array([0, 0, 0])
-    p3 = np.array([0, 1, 0])
-    p4 = np.array([0, 0, 1])
-    src = np.array([p1, p1, p2, p3]).transpose()
-    dst = np.array([p1, p1, p2, p4]).transpose()
-    mat, err = calculate_transformation_kabsch(src, dst)
-
-    homop = np.ones(4)
-    homop[:3] = p3
-    p5 = mat.dot(homop)
-
-    pass
+    # p1 = np.array([1, 0, 0])
+    # p2 = np.array([0, 0, 0])
+    # p3 = np.array([0, 1, 0])
+    # p4 = np.array([0, 0, 1])
+    # src = np.array([p1, p1, p2, p3]).transpose()
+    # dst = np.array([p1, p1, p2, p4]).transpose()
+    # mat, err = calculate_transformation_kabsch(src, dst)
+    #
+    # homop = np.ones(4)
+    # homop[:3] = p3
+    # p5 = mat.dot(homop)
+    #
+    # pass
 
 
 if __name__ == '__main__':
