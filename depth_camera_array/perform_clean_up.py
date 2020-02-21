@@ -1,8 +1,7 @@
 import argparse
 import os
-import shutil
 
-from depth_camera_array.depth_camera_array.utilities import get_or_create_data_dir
+from depth_camera_array.utilities import get_or_create_data_dir
 
 
 def parse_args() -> argparse.Namespace:
@@ -18,5 +17,3 @@ if os.path.exists(directory):
         if file.endswith(".json"):
             print(file)
             #os.remove(file)
-            pass
-            #shutil.rmtree(directory)
