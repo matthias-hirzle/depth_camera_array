@@ -5,8 +5,8 @@ from typing import Any
 
 from depth_camera_array import camera
 from depth_camera_array.utilities import load_json_to_dict, get_or_create_data_dir, dump_dict_as_json
-import pyrealsense2 as rs
-
+import plyfile
+import open3d as o3d
 import numpy as np
 
 
@@ -34,9 +34,13 @@ def is_in_range(point: Any, bottom: float, height: float, radius: float) -> bool
         return False
 
 
-def remove_unnecessary_content(object_points, bottom: float, height: float, radius: float) -> Any:
+def remove_unnecessary_content(object_points, bottom: float, height: float, radius: float) -> np.array:
     """Removes points that are not in range"""
-    return np.array(list(filter(lambda item: is_in_range(item, bottom, height, radius), object_points)))
+    filtered_points = []
+    for item in object_points:
+        if is_in_range(item,bottom,height,radius):
+            filtered_points.append(item.tolist())
+    return filtered_points
 
 
 def transform(object_points:list, extrinsics:np.array):
@@ -46,7 +50,17 @@ def transform(object_points:list, extrinsics:np.array):
     transformed = extrinsics.dot(points)
     return transformed[:-1,:].transpose()
 
-def dump_to_ply(merged_point_cloud):
+
+def dump_to_ply(object_points: np.array, data_dir: str):
+    points = np.array(object_points)
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(points)
+    o3d.io.write_point_cloud(os.path.join(data_dir, 'test.ply'), pcd)
+
+    # points = list(map(lambda item: tuple(item), object_points))
+    # points = np.array(points, dtype=[('x','f4'),('y','f4'),('z','f4')])
+    # element = plyfile.PlyElement.describe(points, 'test')
+    # data = plyfile.PlyData([element]).write(os.path.join(data_dir, 'test.ply'))
     pass
 
 
@@ -60,10 +74,12 @@ def main():
         object_points = cam.depth_frame_to_object_point(frames)
         object_points = transform(object_points, np.array(trans_matrix))
         object_points = remove_unnecessary_content(object_points, args.bottom, args.height, args.radius)
-        dump_dict_as_json({cam.device_id:object_points.tolist()})
+        serial_points = np.array(object_points).transpose()
+        dump_dict_as_json({cam.device_id: serial_points.tolist()}, os.path.join(args.data_dir, cam.device_id + '_object_points.json'))
+        dump_to_ply(object_points, args.data_dir)
     # merge point clouds
     merged_point_cloud = None
-    #dump_to_ply(merged_point_cloud, args.data_dir)  # TODO move to Util
+
 
 
 if __name__ == '__main__':
