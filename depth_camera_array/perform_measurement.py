@@ -36,11 +36,11 @@ def remove_unnecessary_content(object_points, bottom: float, height: float, radi
     return filtered_points
 
 
-def transform(object_points: list, extrinsics: np.array):
-    temp = np.array(object_points).transpose()
-    points = np.ones((4, temp.shape[1],))
-    points[:-1, :] = temp
-    transformed = extrinsics.dot(points)
+def apply_transformation(object_points: np.array, extrinsic: np.array) -> np.array:
+    tmp = object_points.transpose()
+    points = np.ones((4, tmp.shape[1],))
+    points[:-1, :] = tmp
+    transformed = extrinsic.dot(points)
     return transformed[:-1, :].transpose()
 
 
@@ -58,8 +58,8 @@ def main():
     for cam in all_connected_cams:
         trans_matrix = np.array(dictionary[cam.device_id])
         frames = cam.poll_frames()
-        object_points = cam.depth_frame_to_object_point(frames)
-        object_points = transform(object_points, np.array(trans_matrix))
+        object_points = cam.depth_frame_to_object_points(frames)
+        object_points = apply_transformation(object_points, np.array(trans_matrix))
         object_points = remove_unnecessary_content(object_points, args.bottom, args.height, args.radius)
         serial_points = np.array(object_points).transpose()
         dump_dict_as_json({cam.device_id: serial_points.tolist()},
