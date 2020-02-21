@@ -12,7 +12,6 @@ from depth_camera_array.utilities import load_json_to_dict, create_if_not_exists
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser('Measures the scene')
-    parser.add_argument('--camera_setup', type=str, help='Path to the file, created by calibration module')
     parser.add_argument('--bottom', type=float, default=0.0, help='Bottom of the measurement sphere in m')
     parser.add_argument('--height', type=float, default=1.8, help='Height of the measurement sphere in m')
     parser.add_argument('--radius', type=float, default=0.5, help='Radius of the measurement sphere in m')
