@@ -67,6 +67,21 @@ class Camera:
 
         return object_points
 
+    def depth_frame_to_object_point(self, frames:rs.composite_frame) -> List:
+        depth_frame: rs.depth_frame = frames.get_depth_frame()
+        depth_profile = depth_frame.get_profile().as_video_stream_profile()
+        depth_intrinsics = depth_profile.get_intrinsics()
+        size = depth_frame.get_data_size()
+        object_points = []
+        for x in range(depth_intrinsics.width):
+            for y in range(depth_intrinsics.height):
+                pixel = [x, y]
+                depth = depth_frame.get_distance(x,y)
+                object_points.append(
+                    rs.rs2_deproject_pixel_to_point(intrin=depth_intrinsics, pixel=pixel, depth=depth))
+        return object_points
+
+
     def get_point_cloud(self, frames: rs.composite_frame) -> rs.points:
         pc = rs.pointcloud()
         color_frame = frames.get_color_frame()
