@@ -7,7 +7,7 @@ import numpy as np
 from open3d import open3d as o3d
 
 from depth_camera_array import camera
-from depth_camera_array.utilities import load_json_to_dict, get_or_create_data_dir, dump_dict_as_json
+from depth_camera_array.utilities import load_json_to_dict, create_if_not_exists, dump_dict_as_json, DEFAULT_DATA_DIR
 
 
 def parse_args() -> argparse.Namespace:
@@ -16,8 +16,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--bottom', type=float, default=0.0, help='Bottom of the measurement sphere in m')
     parser.add_argument('--height', type=float, default=1.8, help='Height of the measurement sphere in m')
     parser.add_argument('--radius', type=float, default=0.5, help='Radius of the measurement sphere in m')
-    parser.add_argument('--data_dir', type=str, help='Data location to load and dump config files',
-                        default=get_or_create_data_dir())
+    parser.add_argument('--data_dir', type=lambda item: create_if_not_exists(item), default=DEFAULT_DATA_DIR,
+                        help='Data location to load and dump config files', )
     return parser.parse_args()
 
 

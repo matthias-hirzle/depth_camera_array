@@ -1,17 +1,17 @@
 import argparse
-import json
 import os
 from typing import List, Tuple
 
 from cv2 import aruco
 
 from depth_camera_array.camera import initialize_connected_cameras, extract_color_image, close_connected_cameras
-from depth_camera_array.utilities import get_or_create_data_dir, dump_dict_as_json
+from depth_camera_array.utilities import create_if_not_exists, dump_dict_as_json, DEFAULT_DATA_DIR
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser('Detects all available acuro markers')
-    parser.add_argument('--data_dir', type=str, required=False, help='Data location to load and dump config files', default=get_or_create_data_dir())
+    parser.add_argument('--data_dir', type=lambda item: create_if_not_exists(item), required=False,
+                        help='Data location to load and dump config files', default=DEFAULT_DATA_DIR)
     return parser.parse_args()
 
 
@@ -61,8 +61,8 @@ def calc_center_coordinates(corners) -> List[float]:
     return [x_sum / 4, y_sum / 4]
 
 
-def dump_arcuro_data(camera_id: str, code_id_array: List[str], coordinate_array: List[Tuple[float, float, float]], data_dir: str):
-
+def dump_arcuro_data(camera_id: str, code_id_array: List[str], coordinate_array: List[Tuple[float, float, float]],
+                     data_dir: str):
     new_dict = {}
     new_dict.update(camera_id=camera_id)
     new_dict.update(aruco=code_id_array)

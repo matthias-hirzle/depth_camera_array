@@ -1,9 +1,10 @@
 import json
 import os
 
+DEFAULT_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data'))
 
-def get_or_create_data_dir() -> str:
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data')
+
+def create_if_not_exists(path: str = DEFAULT_DATA_DIR) -> str:
     if not os.path.exists(path):
         os.makedirs(path)
     return path

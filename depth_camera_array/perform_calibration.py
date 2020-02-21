@@ -1,17 +1,17 @@
 import argparse
 import os
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict
 
 import numpy as np
 import rmsd
 
-from depth_camera_array.utilities import get_or_create_data_dir, load_json_to_dict, dump_dict_as_json
+from depth_camera_array.utilities import create_if_not_exists, load_json_to_dict, dump_dict_as_json, DEFAULT_DATA_DIR
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser('Performes an extrinsic calibration for each available camera')
-    parser.add_argument('--data_dir', type=str, required=False, help='Data location to load and dump config files',
-                        default=get_or_create_data_dir())
+    parser.add_argument('--data_dir', type=lambda item: create_if_not_exists(item), default=DEFAULT_DATA_DIR,
+                        help='Data location to load and dump config files')
     return parser.parse_args()
 
 
