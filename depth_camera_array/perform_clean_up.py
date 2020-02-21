@@ -16,5 +16,5 @@ directory = args.data_dir
 if os.path.exists(directory):
     for file in os.listdir(directory):
         if file.endswith(".json"):
-            print(directory+file)
+            print(directory+'/'+file)
             #os.remove(directory+file)
