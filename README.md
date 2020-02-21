@@ -28,3 +28,7 @@ pip install -r requirements.txt
 ```bash
 pip install git+https://github.com/matthias-hirzle/depth_camera_array.git@master#egg=depth_camera_array
 ```
+## Usage
+1. Detect aruco markers
+1. Calibrate extrinsic
+1. Measure point clouds in defined cylinder area and dump it as .ply file
