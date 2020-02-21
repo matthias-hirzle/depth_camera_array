@@ -3,11 +3,11 @@ import math
 import os
 from typing import Any
 
+import numpy as np
+from open3d import open3d as o3d
+
 from depth_camera_array import camera
 from depth_camera_array.utilities import load_json_to_dict, get_or_create_data_dir, dump_dict_as_json
-import plyfile
-from open3d import open3d as o3d
-import numpy as np
 
 
 def parse_args() -> argparse.Namespace:
@@ -16,7 +16,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--bottom', type=float, default=0.0, help='Bottom of the measurement sphere in m')
     parser.add_argument('--height', type=float, default=1.8, help='Height of the measurement sphere in m')
     parser.add_argument('--radius', type=float, default=0.5, help='Radius of the measurement sphere in m')
-    parser.add_argument('--data_dir', type=str, help='Data location to load and dump config files', default=get_or_create_data_dir())
+    parser.add_argument('--data_dir', type=str, help='Data location to load and dump config files',
+                        default=get_or_create_data_dir())
     return parser.parse_args()
 
 
@@ -38,30 +39,24 @@ def remove_unnecessary_content(object_points, bottom: float, height: float, radi
     """Removes points that are not in range"""
     filtered_points = []
     for item in object_points:
-        if is_in_range(item,bottom,height,radius):
+        if is_in_range(item, bottom, height, radius):
             filtered_points.append(item.tolist())
     return filtered_points
 
 
-def transform(object_points:list, extrinsics:np.array):
+def transform(object_points: list, extrinsics: np.array):
     temp = np.array(object_points).transpose()
     points = np.ones((4, temp.shape[1],))
     points[:-1, :] = temp
     transformed = extrinsics.dot(points)
-    return transformed[:-1,:].transpose()
+    return transformed[:-1, :].transpose()
 
 
-def dump_to_ply(object_points: np.array, data_dir: str):
+def dump_to_ply(object_points: np.array, data_dir: str, camera_id: str):
     points = np.array(object_points)
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(points)
-    o3d.io.write_point_cloud(os.path.join(data_dir, 'test.ply'), pcd)
-
-    # points = list(map(lambda item: tuple(item), object_points))
-    # points = np.array(points, dtype=[('x','f4'),('y','f4'),('z','f4')])
-    # element = plyfile.PlyElement.describe(points, 'test')
-    # data = plyfile.PlyData([element]).write(os.path.join(data_dir, 'test.ply'))
-    pass
+    o3d.io.write_point_cloud(os.path.join(data_dir, f'{camera_id}.ply'), pcd)
 
 
 def main():
@@ -75,11 +70,9 @@ def main():
         object_points = transform(object_points, np.array(trans_matrix))
         object_points = remove_unnecessary_content(object_points, args.bottom, args.height, args.radius)
         serial_points = np.array(object_points).transpose()
-        dump_dict_as_json({cam.device_id: serial_points.tolist()}, os.path.join(args.data_dir, cam.device_id + '_object_points.json'))
-        dump_to_ply(object_points, args.data_dir)
-    # merge point clouds
-    merged_point_cloud = None
-
+        dump_dict_as_json({cam.device_id: serial_points.tolist()},
+                          os.path.join(args.data_dir, cam.device_id + '_object_points.json'))
+        dump_to_ply(object_points, args.data_dir, cam.device_id)
 
 
 if __name__ == '__main__':
