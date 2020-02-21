@@ -1,1 +1,0 @@
-pyton -m depth_camera_array.perform_mesh_generation
