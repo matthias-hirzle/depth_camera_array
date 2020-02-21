@@ -1,0 +1,1 @@
+python -m depth_camera_array.create_calibration_targets

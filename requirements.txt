@@ -3,3 +3,4 @@ opencv-contrib-python
 numpy
 rmsd
 open3d
+matplotlib
