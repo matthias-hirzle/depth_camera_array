@@ -6,7 +6,7 @@ from typing import Any
 from depth_camera_array import camera
 from depth_camera_array.utilities import load_json_to_dict, get_or_create_data_dir, dump_dict_as_json
 import plyfile
-import open3d as o3d
+from open3d import open3d as o3d
 import numpy as np
 
 
