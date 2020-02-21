@@ -1,7 +1,7 @@
 import argparse
 import os
 
-from depth_camera_array.depth_camera_array.utilities import get_or_create_data_dir
+from depth_camera_array.utilities import get_or_create_data_dir
 
 
 def parse_args() -> argparse.Namespace:
@@ -16,5 +16,5 @@ directory = args.data_dir
 if os.path.exists(directory):
     for file in os.listdir(directory):
         if file.endswith(".json"):
-            # print(directory+'/'+file)
-            os.remove(directory+'/'+file)
+            # print(directory + '/' + file)
+            os.remove(directory + '/' + file)
