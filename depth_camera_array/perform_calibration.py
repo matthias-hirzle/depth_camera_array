@@ -1,6 +1,6 @@
 import argparse
 import os
-from typing import Tuple, Dict
+from typing import Tuple, Dict, List
 
 import numpy as np
 import rmsd
@@ -15,7 +15,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def read_aruco_data(data_dir: str):
+def read_aruco_data(data_dir: str) -> Dict[Dict[str, list]]:
     calibration_data = {}
     for file in os.listdir(data_dir):
         if file.endswith("_reference_points.json"):
