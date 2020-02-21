@@ -15,7 +15,6 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-# read data from multiple files
 def read_aruco_data(data_dir: str):
     calibration_data = {}
     for file in os.listdir(data_dir):
@@ -137,8 +136,10 @@ def calculate_absolute_transformations(relative_transformations: Dict[str, np.ar
     reference_point = np.array(marker_points[0])
     edge_points = np.array(list(map(lambda item: np.array(item), bottom_points[:3])))
 
-    # 1. normale
+    # 1. norm
     norm = np.cross(edge_points[0] - edge_points[1], edge_points[0] - edge_points[2])
+
+    # 2. eventually switch direction of norm.
     if np.linalg.norm(reference_point - norm) > np.linalg.norm(reference_point + norm):
         norm = norm * (-1)
 
@@ -162,7 +163,6 @@ def calculate_absolute_transformations(relative_transformations: Dict[str, np.ar
 
 
 def generate_extrinsics(aruco_data: dict) -> dict:
-    # 1. define base_camera
     base_camera = define_base_camera(aruco_data)
     relative_transformations = calculate_relative_transformations(aruco_data, base_camera)
     final_transformations = calculate_absolute_transformations(relative_transformations, aruco_data, base_camera)
@@ -177,20 +177,6 @@ def main():
     aruco_data = read_aruco_data(args.data_dir)
     transformations = generate_extrinsics(aruco_data)
     dump_dict_as_json(transformations, os.path.join(args.data_dir, 'camera_array.json'))
-
-    # p1 = np.array([1, 0, 0])
-    # p2 = np.array([0, 0, 0])
-    # p3 = np.array([0, 1, 0])
-    # p4 = np.array([0, 0, 1])
-    # src = np.array([p1, p1, p2, p3]).transpose()
-    # dst = np.array([p1, p1, p2, p4]).transpose()
-    # mat, err = calculate_transformation_kabsch(src, dst)
-    #
-    # homop = np.ones(4)
-    # homop[:3] = p3
-    # p5 = mat.dot(homop)
-    #
-    # pass
 
 
 if __name__ == '__main__':
