@@ -17,6 +17,10 @@ def parse_args() -> argparse.Namespace:
 
 def main():
     args = parse_args()
+    for file in os.listdir(args.data_dir):
+        if file.endswith('_reference_points.json'):
+            os.remove(os.path.join(args.data_dir, file))
+
     cameras = initialize_connected_cameras()
     for cam in cameras:
         frames = cam.poll_frames()
