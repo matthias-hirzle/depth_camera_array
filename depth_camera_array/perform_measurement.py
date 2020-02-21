@@ -20,25 +20,18 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def is_in_range(point: Any, bottom: float, height: float, radius: float) -> bool:
-    # √x2 + z2 <= r
-    a = math.sqrt(math.pow(point[0], 2) + math.pow(point[2], 2)) <= radius
-    # y < b + h
-    b = point[1] < bottom + height
-    # y > b
-    c = height > bottom
-
-    if a and b and c:
-        return True
-    else:
-        return False
+def is_in_measurement_cylinder(point: np.array, bottom: float, height: float, radius: float) -> bool:
+    is_beside_cylinder = np.linalg.norm([point[0], point[2]]) > radius
+    is_above_cylinder = point[1] > (bottom + height)
+    is_below_cylinder = point[1] < bottom
+    return not (is_beside_cylinder or is_above_cylinder or is_below_cylinder)
 
 
 def remove_unnecessary_content(object_points, bottom: float, height: float, radius: float) -> np.array:
-    """Removes points that are not in range"""
+    """Removes points outside the defined measurement cylinder"""
     filtered_points = []
     for item in object_points:
-        if is_in_range(item, bottom, height, radius):
+        if is_in_measurement_cylinder(item, bottom, height, radius):
             filtered_points.append(item.tolist())
     return filtered_points
 
