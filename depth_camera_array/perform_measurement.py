@@ -1,13 +1,14 @@
 import argparse
 import math
+import multiprocessing as mp
 import os
-from typing import Any
+from typing import Any, Tuple
 
 import numpy as np
 from open3d import open3d as o3d
 
-from depth_camera_array import camera
-from depth_camera_array.utilities import load_json_to_dict, get_or_create_data_dir, dump_dict_as_json
+from depth_camera_array.camera import Camera, initialize_connected_cameras
+from depth_camera_array.utilities import load_json_to_dict, get_or_create_data_dir
 
 
 def parse_args() -> argparse.Namespace:
@@ -59,20 +60,31 @@ def dump_to_ply(object_points: np.array, data_dir: str, camera_id: str):
     o3d.io.write_point_cloud(os.path.join(data_dir, f'{camera_id}.ply'), pcd)
 
 
+def measure_per_camera(camera: Camera, extrinsic: np.array, bottom, height, radius) -> Tuple[str, list]:
+    frames = camera.poll_frames()
+    object_points = camera.depth_frame_to_object_point(frames)
+    object_points = transform(object_points, np.array(extrinsic))
+    object_points = remove_unnecessary_content(object_points, bottom, height, radius)
+    return camera.device_id, object_points
+
+
 def main():
     args = parse_args()
-    dictionary = load_json_to_dict(os.path.join(args.data_dir, 'camera_array.json'))
-    all_connected_cams = camera.initialize_connected_cameras()
-    for cam in all_connected_cams:
-        trans_matrix = np.array(dictionary[cam.device_id])
-        frames = cam.poll_frames()
-        object_points = cam.depth_frame_to_object_point(frames)
-        object_points = transform(object_points, np.array(trans_matrix))
-        object_points = remove_unnecessary_content(object_points, args.bottom, args.height, args.radius)
-        serial_points = np.array(object_points).transpose()
-        dump_dict_as_json({cam.device_id: serial_points.tolist()},
-                          os.path.join(args.data_dir, cam.device_id + '_object_points.json'))
-        dump_to_ply(object_points, args.data_dir, cam.device_id)
+    transformations = load_json_to_dict(os.path.join(args.data_dir, 'camera_array.json'))
+    connected_cameras = initialize_connected_cameras()
+    with mp.Pool(mp.cpu_count()) as pool:
+        procs = [
+            pool.apply_async(
+                measure_per_camera,
+                (camera, transformations[camera.device_id], args.bottom, args.height, args.radius)
+            )
+            for camera in connected_cameras
+        ]
+        results = [proc.get() for proc in procs]
+    # wait until pool is closed
+    pool.join()
+    for result in results:
+        dump_to_ply(result[1], args.data_dir, result[0])
 
 
 if __name__ == '__main__':
