@@ -1,1 +1,0 @@
-python -m depth_camera_array.delete_data
