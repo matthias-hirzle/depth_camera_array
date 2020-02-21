@@ -3,7 +3,10 @@ import math
 import os
 from typing import Any
 
-from depth_camera_array.depth_camera_array import camera
+from depth_camera_array import camera
+from depth_camera_array.utilities import load_json_to_dict, get_or_create_data_dir
+import pyrealsense2 as rs
+import numpy as np
 
 
 def parse_args() -> argparse.Namespace:
@@ -35,8 +38,34 @@ def remove_unnecessary_content(point_cloud: Any, bottom: float, height: float, r
     return filter(lambda item: is_in_range(item, bottom, height, radius), point_cloud)
 
 
-def transform(device_id: str, point_cloud: Any, data_dir: str):
-    pass
+def transform(device_id: str, point_cloud: rs.points, data_dir: str):
+    dictionary = load_json_to_dict(os.path.join(data_dir, 'camera_array.json'))
+    trans_matrix = np.array(dictionary[device_id])
+    rotation = trans_matrix[:3,:3]
+    translation = trans_matrix[3, :3]
+    #extrin = rs.extrinsics()
+    #extrin.rotation = rotation
+    #extrin.translation = translation
+    pose_mat = np.zeros((4, 4))
+    points = point_cloud.get_vertices()
+    #rs.rs2_transform_point_to_point()
+    textures = point_cloud.get_texture_coordinates()
+    #nparray = np.array([list(point) for point in points])
+    nparray = np.array(points)
+    rs.pose_stream_profile.register_extrinsics_to()
+    new_array = []
+    for item in nparray:
+        new_array.append(np.array(item))
+    new_array = np.array(new_array)
+    #assert nparray.shape[0] == 3
+    #n = nparray.shape[1]
+    nparray = nparray.transpose()
+    shape = nparray.shape
+    homo = np.ones((4, shape[0]))
+    #mulped = np.matmul(trans_matrix, nparray)
+    #for point in points:
+        #print(point)
+    print()
 
 
 def dump_to_ply(merged_point_cloud):
