@@ -1,7 +1,5 @@
 import argparse
-import math
 import os
-from typing import Any
 
 import numpy as np
 from open3d import open3d as o3d
