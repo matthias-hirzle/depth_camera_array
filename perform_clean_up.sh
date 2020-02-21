@@ -1,0 +1,1 @@
+python -m depth_camera_array.perform_clean_up

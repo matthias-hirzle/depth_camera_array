@@ -3,7 +3,7 @@ import math
 import os
 from typing import Any
 
-from depth_camera_array import camera
+from depth_camera_array.depth_camera_array import camera
 
 
 def parse_args() -> argparse.Namespace:

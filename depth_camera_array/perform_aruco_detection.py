@@ -5,8 +5,8 @@ from typing import List, Tuple
 
 from cv2 import aruco
 
-from depth_camera_array.camera import initialize_connected_cameras, extract_color_image, close_connected_cameras
-from depth_camera_array.utilities import get_or_create_data_dir, dump_dict_as_json
+from depth_camera_array.depth_camera_array.camera import initialize_connected_cameras, extract_color_image, close_connected_cameras
+from depth_camera_array.depth_camera_array.utilities import get_or_create_data_dir, dump_dict_as_json
 
 
 def parse_args() -> argparse.Namespace:

@@ -5,7 +5,7 @@ from typing import Tuple, Dict
 import numpy as np
 import rmsd
 
-from depth_camera_array.utilities import get_or_create_data_dir, load_json_to_dict, dump_dict_as_json
+from depth_camera_array.depth_camera_array.utilities import get_or_create_data_dir, load_json_to_dict, dump_dict_as_json
 
 
 def parse_args() -> argparse.Namespace:
