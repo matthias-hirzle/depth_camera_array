@@ -2,5 +2,4 @@ pyrealsense2
 opencv-contrib-python
 numpy
 rmsd
-plyfile
 open3d
