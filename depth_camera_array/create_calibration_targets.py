@@ -24,6 +24,7 @@ def create_bottom_target(data_dir):
         ax = fig.add_subplot(*shape, index)
         img = aruco.drawMarker(aruco.Dictionary_get(aruco.DICT_5X5_250), index, 700)
         plt.imshow(img, cmap=mpl.cm.gray, interpolation="nearest")
+        ax.set_title(aruco_id, color='gray')
         ax.axis('off')
 
     # Z-Axis
@@ -43,19 +44,33 @@ def create_bottom_target(data_dir):
 
 def create_relative_targets(target_count, min_aruco_id, data_dir):
     shape = (2, 3,)
+    aruco_id = min_aruco_id
     for i in range(target_count):
         fig = plt.figure()
-        fig.suptitle(f'Targets ({min_aruco_id}-{min_aruco_id + 4})', color='gray')
+        fig.suptitle(f'Front Targets ({aruco_id}-{aruco_id + 3})', color='gray')
         for k in [1, 2, 4, 5]:
             ax = fig.add_subplot(*shape, k)
-            img = aruco.drawMarker(aruco.Dictionary_get(aruco.DICT_5X5_250), min_aruco_id, 700)
+            img = aruco.drawMarker(aruco.Dictionary_get(aruco.DICT_5X5_250), aruco_id, 700)
             plt.imshow(img, cmap=mpl.cm.gray, interpolation="nearest")
-            ax.axis("off")
-            ax.set_xlabel(min_aruco_id)
-            min_aruco_id += 1
+            ax.axis('off')
+            ax.set_title(aruco_id, color='gray')
+            aruco_id += 1
 
-        plt.savefig(os.path.join(data_dir, f'relative_target_{min_aruco_id - 5}_to_{min_aruco_id - 1}.pdf'))
+        plt.savefig(os.path.join(data_dir, f'relative_target_{aruco_id - 4}_to_{aruco_id-1}_front.pdf'))
 
+    aruco_id = min_aruco_id
+    for i in range(target_count):
+        fig = plt.figure()
+        fig.suptitle(f'Back Targets ({aruco_id}-{aruco_id + 3})', color='gray')
+        for k in [3, 2, 6, 5]:
+            ax = fig.add_subplot(*shape, k)
+            img = aruco.drawMarker(aruco.Dictionary_get(aruco.DICT_5X5_250), aruco_id, 700)
+            plt.imshow(img, cmap=mpl.cm.gray, interpolation="nearest")
+            ax.axis('off')
+            ax.set_title(aruco_id, color='gray')
+            aruco_id += 1
+
+        plt.savefig(os.path.join(data_dir, f'relative_target_{aruco_id - 4}_to_{aruco_id - 1}_back.pdf'))
 
 def main():
     args = parse_args()
