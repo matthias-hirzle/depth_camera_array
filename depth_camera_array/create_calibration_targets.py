@@ -20,22 +20,22 @@ def create_bottom_target(data_dir):
     shape = (3, 4,)
     fig = plt.figure()
     fig.suptitle('Bottom Target (1-3)', color='gray')
-    for index, aruco_id in [(1, 1,), (4, 2,), (12, 3,)]:
+    for index, aruco_id in [(1, 1,), (9, 2,), (12, 3,)]:
         ax = fig.add_subplot(*shape, index)
         img = aruco.drawMarker(aruco.Dictionary_get(aruco.DICT_5X5_250), index, 700)
         plt.imshow(img, cmap=mpl.cm.gray, interpolation="nearest")
         ax.axis('off')
 
     # Z-Axis
-    ax = fig.add_subplot(*shape, 8)
-    ax.annotate('', xy=(0.5, 0), xytext=(0.5, 1), arrowprops=dict(edgecolor='gray', facecolor='gray', shrink=0.05))
+    ax = fig.add_subplot(*shape, 5)
+    ax.annotate('', xy=(0.5, 1), xytext=(0.5, 0), arrowprops=dict(edgecolor='gray', facecolor='gray', shrink=0.05))
     ax.axis('off')
-    ax.text(0.6, 0.5, 'Z', color='gray')
+    ax.text(0.3, 0.5, 'Z', color='gray')
     plt.savefig(os.path.join(data_dir, 'bottom_target.pdf'))
 
     # X-Axis
-    ax = fig.add_subplot(3, 3, 2)
-    ax.annotate('', xy=(0, 0.5), xytext=(1, 0.5), arrowprops=dict(edgecolor='gray', facecolor='gray', shrink=0.05))
+    ax = fig.add_subplot(3, 3, 8)
+    ax.annotate('', xy=(1, 0.5), xytext=(0, 0.5), arrowprops=dict(edgecolor='gray', facecolor='gray', shrink=0.05))
     ax.text(0.5, 0.6, 'X', color='gray')
     ax.axis('off')
     plt.savefig(os.path.join(data_dir, 'bottom_target.pdf'))
