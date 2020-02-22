@@ -1,11 +1,13 @@
 import argparse
 import os
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Iterable, List, Union
 
 import numpy as np
 import rmsd
 
 from depth_camera_array.utilities import create_if_not_exists, load_json_to_dict, dump_dict_as_json, DEFAULT_DATA_DIR
+
+ReferencePoints = Dict[str, Dict[str, List[Union[int, Tuple[float, float, float]]]]]
 
 
 def parse_args() -> argparse.Namespace:
@@ -15,7 +17,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def read_aruco_data(data_dir: str) -> Dict[Dict[str, list]]:
+def read_aruco_data(data_dir: str) -> dict:
     calibration_data = {}
     for file in os.listdir(data_dir):
         if file.endswith("_reference_points.json"):
@@ -72,16 +74,17 @@ def create_homogenous(rotation_matrix: np.array, translation_vector: np.array) -
     return homogenous
 
 
-def define_base_camera(aruco_data: dict) -> str:
+def define_base_camera(aruco_data: ReferencePoints) -> str:
+    """Finds the camera that detected each bottom target and also detected the highest amount of other targets"""
     base_camera = None
-    arucos = 0
-    bottom_arucos = set(range(20))
+    detected_targets = 0
+    bottom_arucos = {1, 2, 3}
     for k, v in aruco_data.items():
-        intersected = len(bottom_arucos.intersection(set(v['aruco'])))
-        if intersected > arucos:
-            arucos = intersected
+        if bottom_arucos <= set(v['aruco']) and len(v['aruco']) > detected_targets:
             base_camera = k
-    assert arucos > 2
+            detected_targets = len(v['aruco'])
+
+    assert base_camera is not None
     return base_camera
 
 
@@ -118,65 +121,52 @@ def calculate_relative_transformations(aruco_data: dict, base_camera: str) -> Di
     return transformations
 
 
-def calculate_absolute_transformations(relative_transformations: Dict[str, np.array], aruco_data: dict,
-                                       base_camera: str) -> Dict[str, np.array]:
+def calculate_absolute_transformations(reference_points: Iterable[Tuple[int, Tuple[float, float, float]]]) -> np.array:
     # find bottom markers
-    markers = aruco_data[base_camera]['aruco']
-    points = aruco_data[base_camera]['centers']
-    bottom_points = []
-    marker_points = []
-    for item in zip(markers, points):
-        if item[0] < 20:
-            bottom_points.append(item[1])
-        else:
-            marker_points.append(item[1])
-    assert len(bottom_points) > 2
+    src_x, src_center, src_z = None, None, None
+    for marker_id, point in reference_points:
+        if marker_id == 1:
+            src_x = np.array(point)
+        elif marker_id == 2:
+            src_center = np.array(point)
+        elif marker_id == 3:
+            src_z = np.array(point)
 
-    # estimate destination direction
-    reference_point = np.array(marker_points[0])
-    edge_points = np.array(list(map(lambda item: np.array(item), bottom_points[:3])))
-
-    # 1. norm
-    norm = np.cross(edge_points[0] - edge_points[1], edge_points[0] - edge_points[2])
-
-    # 2. eventually switch direction of norm.
-    if np.linalg.norm(reference_point - norm) > np.linalg.norm(reference_point + norm):
-        norm = norm * (-1)
-
-    src_center = edge_points[0]
-    src_x = edge_points[1]
-    src_y = src_center + norm
+    assert not (src_x is None or src_center is None or src_z is None)
 
     dst_center = np.array([0., 0., 0.])
     dst_x = np.array([np.linalg.norm(src_center - src_x), 0., 0.])
-    dst_y = np.array([0., abs(np.linalg.norm(norm)), 0.])
+    dst_z = np.array([0., 0., np.linalg.norm(src_center - src_z)])
 
-    src_points = np.array([src_x, src_y, src_center])
-    dst_points = np.array([dst_x, dst_y, dst_center])
+    src_points = np.array([src_x, src_z, src_center])
+    dst_points = np.array([dst_x, dst_z, dst_center])
     transformation, rmsd_value = calculate_transformation_kabsch(src_points.transpose(), dst_points.transpose())
     print("RMS error for calibration to real world system is :", rmsd_value, "m")
 
-    final_transformations = {}
-    for k, v in relative_transformations.items():
-        final_transformations[k] = np.dot(transformation, v)
-    return final_transformations
+    return transformation
 
 
 def generate_extrinsics(aruco_data: dict) -> dict:
     base_camera = define_base_camera(aruco_data)
+    base_camera_reference_points = zip(aruco_data[base_camera]['aruco'], aruco_data[base_camera]['centers'])
     relative_transformations = calculate_relative_transformations(aruco_data, base_camera)
-    final_transformations = calculate_absolute_transformations(relative_transformations, aruco_data, base_camera)
-    for k, v in final_transformations.items():
-        final_transformations[k] = v.tolist()
+    absolute_transformation = calculate_absolute_transformations(base_camera_reference_points)
+    final_transformations = {}
+    for k, v in relative_transformations.items():
+        final_transformations[k] = np.dot(absolute_transformation, v)
+    # final_transformations = calculate_absolute_transformations(relative_transformations, aruco_data, base_camera)
+
     return final_transformations
 
 
 def main():
-    """Creates a camera setup file containing camera ids and extrinsic information"""
+    """Creates a camera setup file containing camera ids and extrinsic information as 4 x 4 matrix"""
     args = parse_args()
     aruco_data = read_aruco_data(args.data_dir)
-    transformations = generate_extrinsics(aruco_data)
-    dump_dict_as_json(transformations, os.path.join(args.data_dir, 'camera_array.json'))
+    final_transformations = generate_extrinsics(aruco_data)
+    for k, v in final_transformations.items():
+        final_transformations[k] = v.tolist()
+    dump_dict_as_json(final_transformations, os.path.join(args.data_dir, 'camera_array.json'))
 
 
 if __name__ == '__main__':
