@@ -19,8 +19,8 @@ def parse_args() -> argparse.Namespace:
 def create_bottom_target(data_dir):
     shape = (3, 4,)
     fig = plt.figure()
-    fig.suptitle('Bottom Target (1-3)', color='gray')
-    for index, aruco_id in [(1, 1,), (9, 2,), (12, 3,)]:
+    fig.suptitle('Bottom Targets (1-3)', color='gray')
+    for index, aruco_id in [(1, 2,), (4, 1,), (9, 3,)]:
         ax = fig.add_subplot(*shape, index)
         img = aruco.drawMarker(aruco.Dictionary_get(aruco.DICT_5X5_250), index, 700)
         plt.imshow(img, cmap=mpl.cm.gray, interpolation="nearest")
@@ -28,15 +28,15 @@ def create_bottom_target(data_dir):
 
     # Z-Axis
     ax = fig.add_subplot(*shape, 5)
-    ax.annotate('', xy=(0.5, 1), xytext=(0.5, 0), arrowprops=dict(edgecolor='gray', facecolor='gray', shrink=0.05))
+    ax.annotate('', xy=(0.5, 0), xytext=(0.5, 1), arrowprops=dict(edgecolor='gray', facecolor='gray', shrink=0.05))
     ax.axis('off')
-    ax.text(0.3, 0.4, 'Z', color='gray')
+    ax.text(0.3, 0.5, 'Z', color='gray')
     plt.savefig(os.path.join(data_dir, 'bottom_target.pdf'))
 
     # X-Axis
-    ax = fig.add_subplot(3, 3, 8)
+    ax = fig.add_subplot(3, 3, 2)
     ax.annotate('', xy=(1, 0.5), xytext=(0, 0.5), arrowprops=dict(edgecolor='gray', facecolor='gray', shrink=0.05))
-    ax.text(0.45, 0.3, 'X', color='gray')
+    ax.text(0.45, 0.6, 'X', color='gray')
     ax.axis('off')
     plt.savefig(os.path.join(data_dir, 'bottom_target.pdf'))
 
@@ -45,7 +45,7 @@ def create_relative_targets(target_count, min_aruco_id, data_dir):
     shape = (2, 3,)
     for i in range(target_count):
         fig = plt.figure()
-        fig.suptitle(f'Relative Target ({min_aruco_id}-{min_aruco_id + 4})', color='gray')
+        fig.suptitle(f'Targets ({min_aruco_id}-{min_aruco_id + 4})', color='gray')
         for k in [1, 2, 4, 5]:
             ax = fig.add_subplot(*shape, k)
             img = aruco.drawMarker(aruco.Dictionary_get(aruco.DICT_5X5_250), min_aruco_id, 700)
