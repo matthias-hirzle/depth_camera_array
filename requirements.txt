@@ -4,3 +4,4 @@ numpy
 rmsd
 open3d
 matplotlib
+pytest
