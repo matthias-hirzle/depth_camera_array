@@ -5,7 +5,7 @@ exported in *.ply format.
 
 ## Installation Instructions
 ### Prerequisites
-Install the [Intel RealSense SDK 2.0](https://dev.intelrealsense.com/docs/installation) for your platform.
+Install the [Intel RealSense SDK 2.0](https://www.intelrealsense.com/developers/) for your platform.
 ### Install manually
 1. Clone the repository:
 ```bash
@@ -44,10 +44,13 @@ pip install git+https://github.com/matthias-hirzle/depth_camera_array.git@master
     markers match each other exactly.
     ![Relative Target](https://drive.google.com/uc?export=view&id=108rJgdewXZShswhkx3LOTUoS4TjCuWWP)
     1. Position the _Relative Targets_ so that they are in the field of view of every camera.
-    1. Position the _Bottom Target_ on the ground. This target describes the World Coordinate system you want to 
-    transform to. 
+    1. Position the _Bottom Target_ on the ground. This target describes the axis directions and the center of the 
+    world-coordinate-system you want to transform to. It must be in the view of at least one camera.
     ![Bottom Target](https://drive.google.com/uc?export=view&id=1o_QjE5uSYpaoqQz28YgRcqxZjMs779cs)
-    
+> Use the RealSense Viewer tool to check if the view of cameras.    
+### Calibration
 1. Detect aruco markers
 1. Calibrate extrinsic
+
+### Measurement
 1. Measure point clouds in defined cylinder area and dump it as .ply file
