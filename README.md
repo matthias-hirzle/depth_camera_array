@@ -44,11 +44,11 @@ pip install git+https://github.com/matthias-hirzle/depth_camera_array.git@master
     `relative_target_..._front.pdf` files. For each `...front.pdf` file, one `...back.pdf` will be created. 
     Print the files and stick the corresponding sheets together. Make sure that the corners of the corresponding aruco 
     markers match each other exactly.
-    ![Relative Target](https://drive.google.com/uc?export=view&id=108rJgdewXZShswhkx3LOTUoS4TjCuWWP)
+    ![relative_target](https://user-images.githubusercontent.com/44577643/75158326-292e0400-5716-11ea-9479-fc4c3a662982.png)
     1. Position the _Relative Targets_ so that they are in the field of view of every camera.
     1. Position the _Bottom Target_ on the ground. This target describes the axis directions and the center of the 
     world-coordinate-system you want to transform to. It must be in the view of at least one camera.
-    ![Bottom Target](https://drive.google.com/uc?export=view&id=1o_QjE5uSYpaoqQz28YgRcqxZjMs779cs)
+    ![bottom_target](https://user-images.githubusercontent.com/44577643/75158186-e2d8a500-5715-11ea-8d8b-ccb845796f17.png)
 > Use the RealSense Viewer tool to check if the view of cameras.    
 
 ### Calibration
