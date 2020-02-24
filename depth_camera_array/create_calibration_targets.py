@@ -9,10 +9,14 @@ from depth_camera_array.utilities import DEFAULT_DATA_DIR, create_if_not_exists
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser('Creates aruco targets')
+    parser = argparse.ArgumentParser('Creates calibration aruco targets for extrinsic calibration between multiple '
+                                     'RealSense devices and a world coordinate system.')
     parser.add_argument('--data_dir', type=lambda item: create_if_not_exists(item), default=DEFAULT_DATA_DIR,
-                        help='Data location to load and dump config files')
-    parser.add_argument('--target_count', type=int, default=5, help='Number of relative targets (2x2 arucos)')
+                        help='A path to the directory where the created target files will be stored. If the directory '
+                             'does not exist, it will be created. If not set, ./data/ will be used as directory.')
+    parser.add_argument('--target_count', type=int, default=5,
+                        help='Number of targets to calculate relative extrinsic between cameras. If not set, 5 targets '
+                             'will be created.')
     return parser.parse_args()
 
 
