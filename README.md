@@ -32,9 +32,9 @@ pip install git+https://github.com/matthias-hirzle/depth_camera_array.git@master
 
 ## Usage
 ### Calibration Prerequisites
-- Follow the [installation instructions](#installation-instructions) above
-- Activate your virtual environment: `source venv/bin/activate`
-- Create the aruco calibration targets:
+1. Follow the [installation instructions](#installation-instructions) above
+1. Activate your virtual environment: `source venv/bin/activate`
+1. Create the aruco calibration targets:
     1. run script `./create_calibration_targets.sh` to create PDF files. You can pass two optional arguments: 
         - `--target_count=<int>`: Number of targets to calculate relative extrinsic between cameras. 
         If not set, `5` targets will be created.
@@ -69,5 +69,6 @@ Run the script `./perform_calibration` to create a `camera_array.json` file. Thi
 parameters to the world-coordinate-system defined through the position of the bottom-target. The extrinsic 
 parameters are stored as 4x4 homogeneous transformation matrix. 
 
+> Use the RealSense Viewer tool to check the type of usb connection.
 ### Measurement
 1. Measure point clouds in defined cylinder area and dump it as .ply file
