@@ -49,7 +49,7 @@ pip install git+https://github.com/matthias-hirzle/depth_camera_array.git@master
     1. Position the _Bottom Target_ on the ground. This target describes the axis directions and the center of the 
     world-coordinate-system you want to transform to. It must be in the view of at least one camera.
     ![bottom_target](https://user-images.githubusercontent.com/44577643/75158186-e2d8a500-5715-11ea-8d8b-ccb845796f17.png)
-> Use the RealSense Viewer tool to check if the view of cameras.    
+> Use the RealSense Viewer tool to check the view of cameras.    
 
 ### Calibration
 1. **Activate your virtual environment:** `source venv/bin/activate`
