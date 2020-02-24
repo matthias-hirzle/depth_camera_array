@@ -1,1 +1,1 @@
-python -m depth_camera_array.perform_measurement
+python -m depth_camera_array.perform_measurement $*

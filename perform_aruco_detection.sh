@@ -1,1 +1,1 @@
-python -m depth_camera_array.perform_aruco_detection
+python -m depth_camera_array.perform_aruco_detection $*

@@ -1,1 +1,1 @@
-python -m depth_camera_array.perform_calibration
+python -m depth_camera_array.perform_calibration $*
