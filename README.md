@@ -45,7 +45,7 @@ pip install git+https://github.com/matthias-hirzle/depth_camera_array.git@master
     1. Position the _Relative Target_ so that they are in the field of view of every camera.
     1. Position the _Bottom Target_ on the ground. This target describes the World Coordinate system you want to 
     transform to. 
-    ![Bottom Target](https://drive.google.com/file/d/1o_QjE5uSYpaoqQz28YgRcqxZjMs779cs/view?usp=sharing)
+    ![Bottom Target](https://drive.google.com/file/d/1o_QjE5uSYpaoqQz28YgRcqxZjMs779cs/view)
     
 1. Detect aruco markers
 1. Calibrate extrinsic
