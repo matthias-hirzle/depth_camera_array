@@ -2,6 +2,7 @@ import argparse
 import os
 from typing import List, Tuple
 
+import numpy as np
 from cv2 import aruco
 
 from depth_camera_array.camera import initialize_connected_cameras, extract_color_image, close_connected_cameras
@@ -28,6 +29,9 @@ def main():
     cameras = initialize_connected_cameras()
     for cam in cameras:
         frames = cam.poll_frames()
+
+        color_frame = extract_color_image(frames)
+
         all_2d_centers_of_arucos, all_detected_aruco_ids = detect_aruco_targets(frames)
         tree_dimensional_points = cam.image_points_to_object_points(all_2d_centers_of_arucos, frames)
         assert len(tree_dimensional_points) == len(all_detected_aruco_ids)
@@ -35,8 +39,7 @@ def main():
     close_connected_cameras(cameras)
 
 
-def detect_aruco_targets(frames):
-    rgb_image = extract_color_image(frames)
+def detect_aruco_targets(rgb_image: np.array):
     aruco_dict = aruco.Dictionary_get(aruco.DICT_5X5_250)
     detected_coords, ids, _ = aruco.detectMarkers(rgb_image, aruco_dict)
     print('< camera id | detected codes >')
