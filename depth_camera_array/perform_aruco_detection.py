@@ -12,14 +12,18 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser('Detects all available acuro markers')
     parser.add_argument('--data_dir', type=lambda item: create_if_not_exists(item), required=False,
                         help='Data location to load and dump config files', default=DEFAULT_DATA_DIR)
+    parser.add_argument('--remove_previous_data', action='store_true',
+                        help='If set, each reference-point file in data_dir will be removed before performing new '
+                             'detection.')
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-    for file in os.listdir(args.data_dir):
-        if file.endswith('_reference_points.json'):
-            os.remove(os.path.join(args.data_dir, file))
+    if args.remove_previous_data:
+        for file in os.listdir(args.data_dir):
+            if file.endswith('_reference_points.json'):
+                os.remove(os.path.join(args.data_dir, file))
 
     cameras = initialize_connected_cameras()
     for cam in cameras:
