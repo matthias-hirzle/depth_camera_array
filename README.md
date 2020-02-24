@@ -6,6 +6,7 @@ exported in *.ply format.
 ## Installation Instructions
 ### Prerequisites
 Install the [Intel RealSense SDK 2.0](https://www.intelrealsense.com/developers/) for your platform.
+
 ### Install manually
 1. Clone the repository:
 ```bash
@@ -28,8 +29,9 @@ pip install -r requirements.txt
 ```bash
 pip install git+https://github.com/matthias-hirzle/depth_camera_array.git@master#egg=depth_camera_array
 ```
+
 ## Usage
-### Prerequisites
+### Calibration Prerequisites
 - Follow the [installation instructions](#installation-instructions) above
 - Activate your virtual environment: `source venv/bin/activate`
 - Create the aruco calibration targets:
@@ -48,9 +50,25 @@ pip install git+https://github.com/matthias-hirzle/depth_camera_array.git@master
     world-coordinate-system you want to transform to. It must be in the view of at least one camera.
     ![Bottom Target](https://drive.google.com/uc?export=view&id=1o_QjE5uSYpaoqQz28YgRcqxZjMs779cs)
 > Use the RealSense Viewer tool to check if the view of cameras.    
+
 ### Calibration
-1. Detect aruco markers
-1. Calibrate extrinsic
+1. **Activate your virtual environment:** `source venv/bin/activate`
+1. **Detect aruco markers:**
+Connect your RealSense devices to your computer. Make sure that you use USB 3 connections. You do not need to connect 
+each RealSense device to your computer. It is also possible to run the target detection for separate camera groups one 
+after another. This makes sense if you don't have enough USB 3.0 ports to connect each camera or if your USB-cables are
+to short to connect each camera at once. This step will create a `<device_id>_reference_points.json` file for each 
+camera 
+    - Run the script `./perform_aruco_detection.sh --remove_old_data` for the first connected camera group of your 
+    RealSense array. This will delete `<device_id>_reference_points.json` files of previous target detections. This is 
+    necessary to determine correct extrinsic without wrong data in the next step.
+    - Run `perform_aruco_detection.sh` without argument `--remove_old_data` for each other camera group. 
+1. **Calibrate extrinsic:**
+The previously created `<camera_id_reference_points.json>` files, containing information about detected 
+camera-coordinates of aruco markers are loaded and used to determine the extrinsic parameters. 
+    - Run the script `./perform_calibration` to create a `camera_array.json` file. This file contains the extrinsic 
+    parameters to the world-coordinate-system defined through the position of the bottom-target. The extrinsic 
+    parameters are stored as 4x4 homogeneous transformation matrix. 
 
 ### Measurement
 1. Measure point clouds in defined cylinder area and dump it as .ply file
