@@ -3,6 +3,7 @@ import os
 from typing import List, Tuple
 
 import numpy as np
+import rmsd
 from cv2 import aruco
 
 from depth_camera_array.camera import initialize_connected_cameras, extract_color_image, close_connected_cameras
@@ -19,64 +20,47 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def remove_previous_data(data_dir: str):
+    for file in os.listdir(data_dir):
+        if file.endswith('_reference_points.json'):
+            os.remove(os.path.join(data_dir, file))
+
+
 def main():
     args = parse_args()
     if args.remove_previous_data:
-        for file in os.listdir(args.data_dir):
-            if file.endswith('_reference_points.json'):
-                os.remove(os.path.join(args.data_dir, file))
+        remove_previous_data(args.data_dir)
 
     cameras = initialize_connected_cameras()
-    for cam in cameras:
-        frames = cam.poll_frames()
-
+    for camera in cameras:
+        frames = camera.poll_frames()
         color_frame = extract_color_image(frames)
 
-        all_2d_centers_of_arucos, all_detected_aruco_ids = detect_aruco_targets(frames)
-        tree_dimensional_points = cam.image_points_to_object_points(all_2d_centers_of_arucos, frames)
-        assert len(tree_dimensional_points) == len(all_detected_aruco_ids)
-        dump_arcuro_data(cam.device_id, all_detected_aruco_ids, tree_dimensional_points, args.data_dir)
+        aruco_corners_image_points, aruco_ids = detect_aruco_targets(color_frame)
+        aruco_centers_image_points = [determine_aruco_center(corners) for corners in aruco_corners_image_points]
+        aruco_centers_object_points = camera.image_points_to_object_points(aruco_centers_image_points, frames)
+
+        dump_reference_points(camera.device_id, aruco_ids, aruco_centers_object_points, args.data_dir)
     close_connected_cameras(cameras)
 
 
-def detect_aruco_targets(rgb_image: np.array):
-    aruco_dict = aruco.Dictionary_get(aruco.DICT_5X5_250)
-    detected_coords, ids, _ = aruco.detectMarkers(rgb_image, aruco_dict)
-    print('< camera id | detected codes >')
-    print(ids)
-    all_2d_centers = []
-    if ids is not None:
-        for index, cam_id in enumerate(ids):  # for each found aruco-code
-            act_coord = detected_coords[index]
-            center_of_actual_code = calc_center_coordinates(act_coord)
-            all_2d_centers.append(center_of_actual_code)
-        ids = [int(id[0]) for id in ids]
-    else:
-        print('NO Codes detected for actual Camera!!!')
-        ids = []  # return an empty list instead of none
-    return all_2d_centers, ids
+def detect_aruco_targets(rgb_image: np.array) -> Tuple[np.array, List[int]]:
+    aruco_corners, aruco_ids, _ = aruco.detectMarkers(rgb_image, aruco.Dictionary_get(aruco.DICT_5X5_250))
+    return np.array([item[0] for item in aruco_corners]), [item[0] for item in aruco_ids]
 
 
-def calc_center_coordinates(corners) -> List[float]:
-    coordinates = corners[0]
-    x_sum = 0
-    y_sum = 0
-    assert len(coordinates) == 4  # should find four corner coordinates
-    for coord in coordinates:
-        x_sum += coord[0]
-        y_sum += coord[1]
-    return [x_sum / 4, y_sum / 4]
+def determine_aruco_center(corners: np.array) -> np.array:
+    assert corners.shape == (4, 2,)
+    return rmsd.centroid(corners)
 
 
-def dump_arcuro_data(camera_id: str, code_id_array: List[str], coordinate_array: List[Tuple[float, float, float]],
-                     data_dir: str):
-    new_dict = {}
-    new_dict.update(camera_id=camera_id)
-    new_dict.update(aruco=code_id_array)
-    new_dict.update(centers=coordinate_array)
-
-    # write to a file
-    dump_dict_as_json(new_dict, os.path.join(data_dir, f'{camera_id}_reference_points.json'))
+def dump_reference_points(device_id: str, aruco_ids: List[int], aruco_centers: List[np.array], data_dir: str):
+    reference_points = {
+        'camera_id': device_id,
+        'aruco': aruco_ids,
+        'centers': aruco_centers
+    }
+    dump_dict_as_json(reference_points, os.path.join(data_dir, f'{device_id}_reference_points.json'))
 
 
 if __name__ == '__main__':
