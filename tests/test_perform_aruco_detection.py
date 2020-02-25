@@ -42,8 +42,8 @@ class MyTestCase(unittest.TestCase):
         np.testing.assert_array_equal(EXPECTED_DETECT_ARUCO_TARGETS[0], aruco_corners)
 
     def test_determine_aruco_center(self):
-        expected = np.array([0, 0])
-        corners = np.array([[2, 1], [1, -2], [-2, -1], [-1, 2]])
+        expected = np.array([10, 10])
+        corners = np.array([[12, 11], [11, 8], [8, 9], [9, 12]])
         result = determine_aruco_center(corners)
         np.testing.assert_array_equal(expected, result)
 
