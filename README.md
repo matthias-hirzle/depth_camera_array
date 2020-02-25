@@ -49,13 +49,15 @@ Print the files and stick the corresponding sheets with realtive targets togethe
 corresponding aruco markers match each other exactly.
 
 ### Calibration
-1. **Place the calibration targets**: In the view of each camera should be minimum 3 arucos of the _Relative Targets_. 
+#### Place the calibration targets: 
+In the view of each camera should be minimum 3 arucos of the _Relative Targets_. 
 In the view of one camrea should be every _Relative Target_ and also the _Bottom Target_. This camera will be 
 automatically detected as _Base Camera_. Place the _Bottom Target_ according to the desired orientation of the world 
 coordinate system. The more aruco targets in the view of each camera the better is the result of your calibration. 
 ![camera_array](https://user-images.githubusercontent.com/44577643/75285967-e18fa100-5817-11ea-9cc0-15a448225066.png)
 > Use the RealSense Viewer tool to check the view of cameras.    
-1. **Detect aruco markers:**
+
+#### Detect calibration targets:
 Connect your RealSense devices to your computer. Make sure that you use USB 3 connections. Not all RealSense devices 
 need to be connected at the same time. It is also possible to run the target detection for separate camera 
 groups one after another. This makes sense if you don't have enough USB 3.0 ports or if your USB-cables are too short to 
@@ -68,7 +70,8 @@ connected device and store them the `./data/` folder. Pass the argument `--remov
 created by a previous calibration with another camera setup in that folder. You can also choose the destination 
 directory for your `...refernce_points.json` files by passing the argument `--data_dir=<path>`.
 > Do not move the calibration targets until you ran the detection for every device in your RealSense array. 
-1. **Calibrate extrinsic:**
+
+#### Calibrate extrinsic:
 After detecting the positions of the calibration targets run the following script:
 ```bash
 ./perform_calibration
@@ -78,5 +81,6 @@ parameters for each device. If these files are not located in the default `./dat
 `--data_dir=<path>` to define the location. This script creates a file `camera_array.json` that contains extrinsic 
 parameters as 4x4 homogeneous transformation matrices for each device.
 > Use the RealSense Viewer tool to check the type of usb connection.
+
 ### Measurement
-1. Measure point clouds in defined cylinder area and dump it as .ply file
+TODO 
