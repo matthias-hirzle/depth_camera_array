@@ -32,41 +32,44 @@ pip install git+https://github.com/matthias-hirzle/depth_camera_array.git@master
 
 ## Usage
 ### Calibration Prerequisites
-#### Create the aruco calibration targets:
+#### Create the Aruco calibration targets:
 Activate your virtual environment and run script `./create_calibration_targets.sh` to create the calibration targets as 
 PDF files. You can pass two optional arguments: 
-- `--target_count=<int>`: Number of targets to calculate relative extrinsic between cameras. 
+- `--target_count=<int>`: Number of targets to calculate relative extrinsics between cameras. 
 If not set, `5` targets will be created.
-- `--data_dir=<str>`: A path to the directory where the created target files will be stored to. If the directory 
+- `--data_dir=<str>`: A path to the directory where the created target files should be stored to. If the directory 
 does not exist, it will be created. If not set, `./data/` will be used as directory.
 
-As result of executing the script you'll get one `bottom_target.pdf` and multiple `relative_target_..._front.pdf` files.
+As a result of the script execution you'll get: one `bottom_target.pdf` and multiple `relative_target_..._front.pdf` files.
 For each `...front.pdf` file, one `...back.pdf` will be created. Those pdf files should look similar to the images 
 below.  
 ![bottom_target](https://user-images.githubusercontent.com/44577643/75158186-e2d8a500-5715-11ea-8d8b-ccb845796f17.png)
 ![relative_target](https://user-images.githubusercontent.com/44577643/75158326-292e0400-5716-11ea-9479-fc4c3a662982.png)
-Print the files and stick the corresponding sheets with realtive targets together. Make sure that the corners of the 
-corresponding aruco markers match each other exactly.
+
+Print the files and stick the corresponding sheets with relative targets together. Make sure that the corners of the 
+corresponding Aruco markers match each other exactly.
 
 ### Calibration
 #### Place the calibration targets: 
-In the view of each camera should be minimum 3 arucos of the _Relative Targets_. 
-In the view of one camrea should be every _Relative Target_ and also the _Bottom Target_. This camera will be 
-automatically detected as _Base Camera_. Place the _Bottom Target_ according to the desired orientation of the world 
-coordinate system. The more aruco targets in the view of each camera the better is the result of your calibration. 
+Each camera should be able to see at least 3 Relative Aruco targets.
+There should be one camera that can see every Relative Target and also the Bottom one. This camera will be detected and 
+initialised as the Base Camera. The Bottom target should be placed according to the desired orientation of the world 
+coordinate system. The more Aruco targets each camera detects, the better the calibration.
+
 ![camera_array](https://user-images.githubusercontent.com/44577643/75285967-e18fa100-5817-11ea-9cc0-15a448225066.png)
 > Use the RealSense Viewer tool to check the view of cameras.    
 
 #### Detect calibration targets:
-Connect your RealSense devices to your computer. Make sure that you use USB 3 connections. Not all RealSense devices 
+Connect your RealSense devices to your computer. Make sure that you use USB 3.0 connections. Not all RealSense devices 
 need to be connected at the same time. It is also possible to run the target detection for separate camera 
-groups one after another. This makes sense if you don't have enough USB 3.0 ports or if your USB-cables are too short to 
-connect all devices at once. Run the following script for each camera group connected to your computer:
+groups one after another or even for each camera separate. This makes sense if you don't have enough USB 3.0 ports or 
+if your USB-cables are too short to connect all devices at once. Run the following script for each camera group connected
+to your computer:
 ```bash
 ./perform_aruco_detection.sh
 ```
 This will create a `<device_id>_reference_.json` file containing information about the detected aruco markers for each 
-connected device and store them the `./data/` folder. Pass the argument `--remove_old_data` to remove obsolete files 
+connected device and store them in the `./data/` folder. Pass the argument `--remove_old_data` to remove obsolete files 
 created by a previous calibration with another camera setup in that folder. You can also choose the destination 
 directory for your `...refernce_points.json` files by passing the argument `--data_dir=<path>`.
 > Do not move the calibration targets until you ran the detection for every device in your RealSense array. 
