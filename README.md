@@ -35,7 +35,7 @@ pip install git+https://github.com/matthias-hirzle/depth_camera_array.git@master
 #### Create the Aruco calibration targets:
 Activate your virtual environment and run script `./create_calibration_targets.sh` to create the calibration targets as 
 PDF files. You can pass two optional arguments: 
-- `--target_count=<int>`: Number of targets to calculate relative extrinsics between cameras. 
+- `--target_count=<int>`: Number of targets to calculate relative extrinsic parameters between cameras. 
 If not set, `5` targets will be created.
 - `--data_dir=<str>`: A path to the directory where the created target files should be stored to. If the directory 
 does not exist, it will be created. If not set, `./data/` will be used as directory.
@@ -53,7 +53,7 @@ corresponding Aruco markers match each other exactly.
 #### Place the calibration targets: 
 Each camera should be able to see at least 3 Relative Aruco targets.
 There should be one camera that can see every Relative Target and also the Bottom one. This camera will be detected and 
-initialised as the Base Camera. The Bottom target should be placed according to the desired orientation of the world 
+initialized as the Base Camera. The Bottom target should be placed according to the desired orientation of the world 
 coordinate system. The more Aruco targets each camera detects, the better the calibration.
 
 ![camera_array](https://user-images.githubusercontent.com/44577643/75285967-e18fa100-5817-11ea-9cc0-15a448225066.png)
@@ -68,7 +68,7 @@ to your computer:
 ```bash
 ./perform_aruco_detection.sh
 ```
-This will create a `<device_id>_reference_.json` file containing information about the detected aruco markers for each 
+This will create a `<device_id>_reference_points.json` file containing information about the detected aruco markers for each 
 connected device and store them in the `./data/` folder. Pass the argument `--remove_old_data` to remove obsolete files 
 created by a previous calibration with another camera setup in that folder. You can also choose the destination 
 directory for your `...refernce_points.json` files by passing the argument `--data_dir=<path>`.
@@ -79,7 +79,7 @@ After detecting the positions of the calibration targets run the following scrip
 ```bash
 ./perform_calibration
 ```
-This will load the previously created `<camera_id>_reference_points.json` files and use them to determine the extrinsic 
+This will load the previously created `<device_id>_reference_points.json` files and use them to determine the extrinsic 
 parameters for each device. If these files are not located in the default `./data/` directory, pass the argument 
 `--data_dir=<path>` to define the location. This script creates a file `camera_array.json` that contains extrinsic 
 parameters as 4x4 homogeneous transformation matrices for each device.
